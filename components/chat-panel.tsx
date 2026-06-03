@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect, useCallback, FormEvent } from 'react'
 import { useChat } from '@ai-sdk/react'
-import { 
-  Send, 
-  Lightbulb, 
-  Minimize2, 
+import { DefaultChatTransport, type UIMessage } from 'ai'
+import {
+  Send,
+  Lightbulb,
+  Minimize2,
   HelpCircle,
   ListChecks,
   FileText,
@@ -39,36 +40,34 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [activeQuickAction, setActiveQuickAction] = useState<QuickAction | null>(null)
 
-  const { 
-    messages, 
-    input, 
-    handleInputChange, 
-    handleSubmit, 
-    isLoading,
-    setInput,
-    append,
-    reload
+  const [input, setInput] = useState('')
+  const {
+    messages,
+    sendMessage,
+    regenerate,
+    status,
+    error,
   } = useChat({
-    api: '/api/chat',
-    body: {
-      worksheetContext: worksheetContent,
-      provider: 'mistral'
-    },
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+    }),
   })
+
+  const isLoading = status === 'submitted' || status === 'streaming'
 
   // Auto-scroll to bottom and notify parent of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    onMessagesUpdate?.(messages.map(m => ({ role: m.role, content: m.content })))
+    onMessagesUpdate?.(messages.map(m => ({ role: m.role, content: getMessageText(m) })))
   }, [messages, onMessagesUpdate])
 
   // Handle quick action click
   const handleQuickAction = useCallback(async (action: QuickAction) => {
     if (!worksheetContent && !selectedText) return
-    
+
     setActiveQuickAction(action)
     const contextToUse = selectedText || worksheetContent
-    
+
     const actionLabels: Record<QuickAction, string> = {
       explain: 'Explain this to me',
       simplify: 'Simplify this for me',
@@ -76,22 +75,40 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       summarize: 'Summarize this',
       examples: 'Give me examples for this'
     }
-    
-    await append({
-      role: 'user',
-      content: `${actionLabels[action]}:\n\n${contextToUse.slice(0, 2000)}${contextToUse.length > 2000 ? '...' : ''}`
-    })
-    
+
+    await sendMessage(
+      {
+        text: `${actionLabels[action]}:\n\n${contextToUse.slice(0, 2000)}${contextToUse.length > 2000 ? '...' : ''}`,
+      },
+      {
+        body: {
+          worksheetContext: worksheetContent,
+          provider: 'mistral',
+        },
+      },
+    )
+
     setActiveQuickAction(null)
     onClearSelection?.()
-  }, [worksheetContent, selectedText, append, onClearSelection])
+  }, [worksheetContent, selectedText, sendMessage, onClearSelection])
 
   // Handle form submit
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!(input ?? '').trim()) return
-    handleSubmit(e)
-  }, [input, handleSubmit])
+    const trimmedInput = input.trim()
+    if (!trimmedInput) return
+
+    void sendMessage(
+      { text: trimmedInput },
+      {
+        body: {
+          worksheetContext: worksheetContent,
+          provider: 'mistral',
+        },
+      },
+    )
+    setInput('')
+  }, [input, sendMessage, worksheetContent])
 
   // Handle textarea key press
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -126,7 +143,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => reload()}
+            onClick={() => regenerate({ body: { worksheetContext: worksheetContent, provider: 'mistral' } })}
             disabled={isLoading}
             className="text-muted-foreground hover:text-foreground"
           >
@@ -148,7 +165,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             <p className="text-muted-foreground text-sm mb-6 max-w-sm leading-relaxed">
               Ask me anything about your study material, or use the quick actions below to get started.
             </p>
-            
+
             {worksheetContent && (
               <div className="text-xs text-muted-foreground">
                 <span className="text-primary font-medium">Tip:</span> Select text in the worksheet to ask about specific parts
@@ -158,13 +175,13 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
         ) : (
           <div className="p-4 space-y-4">
             {messages.map((message, index) => (
-              <MessageBubble 
-                key={message.id || index} 
-                role={message.role as 'user' | 'assistant'} 
-                content={message.content} 
+              <MessageBubble
+                key={message.id || index}
+                role={message.role as 'user' | 'assistant'}
+                content={getMessageText(message)}
               />
             ))}
-            
+
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center flex-shrink-0">
@@ -178,7 +195,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -203,6 +220,12 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
               ×
             </Button>
           </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="mx-4 mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error.message}
         </div>
       )}
 
@@ -237,10 +260,10 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
           <textarea
             ref={inputRef}
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={worksheetContent 
-              ? "Ask about your study material..." 
+            placeholder={worksheetContent
+              ? "Ask about your study material..."
               : "Add study material to get started..."}
             disabled={isLoading}
             rows={1}
@@ -272,6 +295,13 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 }
 
 // Message bubble component
+function getMessageText(message: UIMessage): string {
+  return message.parts
+    .map((part) => (part.type === 'text' ? part.text : ''))
+    .filter(Boolean)
+    .join('')
+}
+
 function MessageBubble({ role, content }: { role: 'user' | 'assistant'; content: string }) {
   const isUser = role === 'user'
 
@@ -279,8 +309,8 @@ function MessageBubble({ role, content }: { role: 'user' | 'assistant'; content:
     <div className={cn("flex items-start gap-3", isUser && "flex-row-reverse")}>
       <div className={cn(
         "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border",
-        isUser 
-          ? "bg-foreground border-foreground" 
+        isUser
+          ? "bg-foreground border-foreground"
           : "bg-secondary border-border"
       )}>
         {isUser ? (
@@ -291,8 +321,8 @@ function MessageBubble({ role, content }: { role: 'user' | 'assistant'; content:
       </div>
       <div className={cn(
         "flex-1 rounded-lg p-4 max-w-[85%]",
-        isUser 
-          ? "bg-foreground text-background rounded-tr-none ml-auto" 
+        isUser
+          ? "bg-foreground text-background rounded-tr-none ml-auto"
           : "bg-secondary border border-border text-foreground rounded-tl-none"
       )}>
         {isUser ? (
@@ -318,22 +348,22 @@ function AssistantMessage({ content }: { content: string }) {
     while (remaining.length > 0) {
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/)
       const codeMatch = remaining.match(/`([^`]+)`/)
-      
+
       const matches = [
         boldMatch ? { match: boldMatch, type: 'bold' } : null,
         codeMatch ? { match: codeMatch, type: 'code' } : null,
-      ].filter(Boolean).sort((a, b) => 
+      ].filter(Boolean).sort((a, b) =>
         (a?.match?.index ?? Infinity) - (b?.match?.index ?? Infinity)
       )
 
       if (matches.length > 0 && matches[0]) {
         const { match, type } = matches[0]
         const index = match?.index ?? 0
-        
+
         if (index > 0) {
           parts.push(<span key={key++}>{remaining.slice(0, index)}</span>)
         }
-        
+
         if (type === 'bold' && match) {
           parts.push(<strong key={key++} className="font-semibold">{match[1]}</strong>)
         } else if (type === 'code' && match) {
@@ -343,7 +373,7 @@ function AssistantMessage({ content }: { content: string }) {
             </code>
           )
         }
-        
+
         remaining = remaining.slice(index + (match?.[0]?.length ?? 0))
       } else {
         parts.push(<span key={key++}>{remaining}</span>)
