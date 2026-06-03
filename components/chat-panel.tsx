@@ -14,7 +14,9 @@ import {
   Bot,
   User,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Copy,
+  Check
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -39,6 +41,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [activeQuickAction, setActiveQuickAction] = useState<QuickAction | null>(null)
+  const [copiedCodeBlock, setCopiedCodeBlock] = useState<number | null>(null)
 
   const [input, setInput] = useState('')
   const {
@@ -129,9 +132,9 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
   return (
     <div className="chat-panel h-full flex flex-col">
       {/* Header */}
-      <div className="chat-panel-header flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+      <div className="chat-panel-header flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border bg-card">
         <div className="flex items-center gap-3" aria-label="AI chat">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
         </div>
@@ -151,11 +154,11 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       {/* Messages area */}
       <div className="chat-messages flex-1 overflow-y-auto bg-background">
         {showEmptyState ? (
-          <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+          <div className="h-full flex flex-col items-center justify-center p-4 sm:p-8 text-center">
             <div className="w-16 h-16 rounded-xl bg-secondary border border-border flex items-center justify-center mb-6">
               <Bot className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2 text-balance">
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 text-balance">
               Ready to help you learn
             </h3>
             <p className="text-muted-foreground text-sm mb-6 max-w-sm leading-relaxed">
@@ -169,12 +172,14 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             )}
           </div>
         ) : (
-          <div className="p-4 space-y-4">
+          <div className="p-3 sm:p-4 space-y-4">
             {messages.map((message, index) => (
               <MessageBubble
                 key={message.id || index}
                 role={message.role as 'user' | 'assistant'}
                 content={getMessageText(message)}
+                onCopy={setCopiedCodeBlock}
+                copiedId={copiedCodeBlock}
               />
             ))}
 
@@ -199,7 +204,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
       {/* Selected text indicator */}
       {selectedText && (
-        <div className="mx-4 mb-3 p-3 bg-accent-teal-light border border-primary rounded-lg">
+        <div className="mx-3 sm:mx-4 mb-3 p-3 bg-accent-teal-light border border-primary rounded-lg">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-primary mb-1">Selected text:</p>
@@ -220,14 +225,14 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       )}
 
       {error && (
-        <div className="mx-4 mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="mx-3 sm:mx-4 mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error.message}
         </div>
       )}
 
       {/* Quick actions */}
       {worksheetContent && (
-        <div className="px-4 pb-3 bg-background">
+        <div className="px-3 sm:px-4 pb-3 bg-background">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {quickActions.map((action) => (
               <Button
@@ -237,7 +242,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
                 onClick={() => handleQuickAction(action.id)}
                 disabled={isLoading || (!worksheetContent && !selectedText)}
                 className={cn(
-                  "flex-shrink-0 h-8 text-xs",
+                  "flex-shrink-0 h-8 text-xs whitespace-nowrap",
                   "text-muted-foreground hover:text-foreground",
                   activeQuickAction === action.id && "bg-primary border-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
                 )}
@@ -251,7 +256,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       )}
 
       {/* Input area */}
-      <div className="chat-input-area p-4 border-t border-border bg-card">
+      <div className="chat-input-area p-3 sm:p-4 border-t border-border bg-card">
         <form onSubmit={onSubmit} className="relative">
           <textarea
             ref={inputRef}
@@ -298,7 +303,17 @@ function getMessageText(message: UIMessage): string {
     .join('')
 }
 
-function MessageBubble({ role, content }: { role: 'user' | 'assistant'; content: string }) {
+function MessageBubble({ 
+  role, 
+  content,
+  onCopy,
+  copiedId 
+}: { 
+  role: 'user' | 'assistant'
+  content: string
+  onCopy?: (id: number | null) => void
+  copiedId?: number | null
+}) {
   const isUser = role === 'user'
 
   return (
@@ -316,25 +331,35 @@ function MessageBubble({ role, content }: { role: 'user' | 'assistant'; content:
         )}
       </div>
       <div className={cn(
-        "flex-1 rounded-lg p-4 max-w-[85%]",
+        "flex-1 rounded-lg p-3 sm:p-4 min-w-0",
         isUser
-          ? "bg-foreground text-background rounded-tr-none ml-auto"
-          : "bg-secondary border border-border text-foreground rounded-tl-none"
+          ? "bg-foreground text-background rounded-tr-none ml-auto max-w-[85%] sm:max-w-[70%]"
+          : "bg-secondary border border-border text-foreground rounded-tl-none max-w-[85%] sm:max-w-[70%]"
       )}>
         {isUser ? (
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{content}</p>
         ) : (
-          <AssistantMessage content={content} />
+          <AssistantMessage content={content} onCopy={onCopy} copiedId={copiedId} />
         )}
       </div>
     </div>
   )
 }
 
-// Render assistant messages with formatting
-function AssistantMessage({ content }: { content: string }) {
+// Render assistant messages with full markdown support
+function AssistantMessage({ 
+  content,
+  onCopy,
+  copiedId
+}: { 
+  content: string
+  onCopy?: (id: number | null) => void
+  copiedId?: number | null
+}) {
   const lines = content.split('\n')
   const elements: React.ReactNode[] = []
+  let codeBlockIndex = 0
+  let i = 0
 
   const processInlineFormatting = (text: string): React.ReactNode => {
     const parts: React.ReactNode[] = []
@@ -343,18 +368,19 @@ function AssistantMessage({ content }: { content: string }) {
 
     while (remaining.length > 0) {
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/)
+      const italicMatch = remaining.match(/\*(.+?)\*/)
       const codeMatch = remaining.match(/`([^`]+)`/)
 
       const matches = [
-        boldMatch ? { match: boldMatch, type: 'bold' } : null,
-        codeMatch ? { match: codeMatch, type: 'code' } : null,
+        boldMatch ? { match: boldMatch, type: 'bold', index: boldMatch.index ?? 0 } : null,
+        italicMatch ? { match: italicMatch, type: 'italic', index: italicMatch.index ?? 0 } : null,
+        codeMatch ? { match: codeMatch, type: 'code', index: codeMatch.index ?? 0 } : null,
       ].filter(Boolean).sort((a, b) =>
-        (a?.match?.index ?? Infinity) - (b?.match?.index ?? Infinity)
+        (a?.index ?? Infinity) - (b?.index ?? Infinity)
       )
 
       if (matches.length > 0 && matches[0]) {
-        const { match, type } = matches[0]
-        const index = match?.index ?? 0
+        const { match, type, index } = matches[0]
 
         if (index > 0) {
           parts.push(<span key={key++}>{remaining.slice(0, index)}</span>)
@@ -362,9 +388,11 @@ function AssistantMessage({ content }: { content: string }) {
 
         if (type === 'bold' && match) {
           parts.push(<strong key={key++} className="font-semibold">{match[1]}</strong>)
+        } else if (type === 'italic' && match) {
+          parts.push(<em key={key++} className="italic">{match[1]}</em>)
         } else if (type === 'code' && match) {
           parts.push(
-            <code key={key++} className="px-1.5 py-0.5 rounded bg-foreground/10 font-mono text-xs">
+            <code key={key++} className="px-1.5 py-0.5 rounded bg-foreground/10 font-mono text-xs break-words">
               {match[1]}
             </code>
           )
@@ -380,49 +408,159 @@ function AssistantMessage({ content }: { content: string }) {
     return parts.length > 0 ? parts : text
   }
 
-  for (let i = 0; i < lines.length; i++) {
+  while (i < lines.length) {
     const line = lines[i]
 
+    // Code blocks - triple backticks
+    if (line.startsWith('```')) {
+      const language = line.slice(3).trim()
+      const codeLines: string[] = []
+      i++
+      
+      while (i < lines.length && !lines[i].startsWith('```')) {
+        codeLines.push(lines[i])
+        i++
+      }
+
+      elements.push(
+        <CodeBlock 
+          key={`code-${codeBlockIndex}`}
+          code={codeLines.join('\n')}
+          language={language}
+          id={codeBlockIndex}
+          onCopy={onCopy}
+          isCopied={copiedId === codeBlockIndex}
+        />
+      )
+      codeBlockIndex++
+      i++ // Skip closing ```
+      continue
+    }
+
+    // Headers
     if (line.startsWith('# ')) {
       elements.push(
-        <h3 key={i} className="text-base font-semibold mt-3 mb-2 first:mt-0">
+        <h2 key={i} className="text-lg sm:text-xl font-bold mt-4 mb-3 first:mt-0 text-foreground">
           {processInlineFormatting(line.slice(2))}
-        </h3>
+        </h2>
       )
     } else if (line.startsWith('## ')) {
       elements.push(
-        <h4 key={i} className="text-sm font-semibold mt-3 mb-2 first:mt-0">
+        <h3 key={i} className="text-base sm:text-lg font-bold mt-3 mb-2 first:mt-0 text-foreground">
           {processInlineFormatting(line.slice(3))}
+        </h3>
+      )
+    } else if (line.startsWith('### ')) {
+      elements.push(
+        <h4 key={i} className="text-sm sm:text-base font-semibold mt-2 mb-1 first:mt-0 text-foreground">
+          {processInlineFormatting(line.slice(4))}
         </h4>
       )
-    } else if (line.startsWith('> ')) {
+    }
+    // Blockquotes
+    else if (line.startsWith('> ')) {
       elements.push(
-        <blockquote key={i} className="border-l-2 border-primary pl-3 my-2 text-sm italic text-muted-foreground">
+        <blockquote key={i} className="border-l-4 border-primary pl-3 sm:pl-4 my-2 text-sm italic text-muted-foreground bg-foreground/5 py-2 rounded">
           {processInlineFormatting(line.slice(2))}
         </blockquote>
       )
-    } else if (line.match(/^[-*] /)) {
+    }
+    // Bullet points
+    else if (line.match(/^[-*]\s/)) {
       elements.push(
-        <li key={i} className="text-sm ml-4 my-1 list-disc">
-          {processInlineFormatting(line.slice(2))}
-        </li>
+        <div key={i} className="flex gap-2 ml-2 sm:ml-4 my-1">
+          <span className="text-foreground">•</span>
+          <span className="text-sm leading-relaxed text-foreground">
+            {processInlineFormatting(line.slice(2))}
+          </span>
+        </div>
       )
-    } else if (line.match(/^\d+\. /)) {
-      elements.push(
-        <li key={i} className="text-sm ml-4 my-1 list-decimal">
-          {processInlineFormatting(line.replace(/^\d+\. /, ''))}
-        </li>
-      )
-    } else if (line.trim() === '') {
+    }
+    // Numbered lists
+    else if (line.match(/^\d+\.\s/)) {
+      const match = line.match(/^(\d+)\.\s(.*)/)
+      if (match) {
+        elements.push(
+          <div key={i} className="flex gap-2 ml-2 sm:ml-4 my-1">
+            <span className="text-foreground font-medium min-w-fit">{match[1]}.</span>
+            <span className="text-sm leading-relaxed text-foreground">
+              {processInlineFormatting(match[2])}
+            </span>
+          </div>
+        )
+      }
+    }
+    // Empty lines
+    else if (line.trim() === '') {
       elements.push(<div key={i} className="h-2" />)
-    } else {
+    }
+    // Regular paragraphs
+    else {
       elements.push(
-        <p key={i} className="text-sm leading-relaxed my-1.5">
+        <p key={i} className="text-sm leading-relaxed my-1 text-foreground break-words">
           {processInlineFormatting(line)}
         </p>
       )
     }
+
+    i++
   }
 
-  return <div className="space-y-0.5">{elements}</div>
+  return <div className="space-y-1 sm:space-y-2">{elements}</div>
+}
+
+// Code block component with copy button
+function CodeBlock({ 
+  code, 
+  language, 
+  id,
+  onCopy,
+  isCopied
+}: { 
+  code: string
+  language?: string
+  id: number
+  onCopy?: (id: number | null) => void
+  isCopied?: boolean
+}) {
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code)
+    if (onCopy) {
+      onCopy(id)
+      setTimeout(() => onCopy(null), 2000)
+    }
+  }
+
+  return (
+    <div className="my-3 rounded-lg overflow-hidden bg-foreground/5 border border-border">
+      <div className="flex items-center justify-between bg-foreground/10 px-3 py-2">
+        <span className="text-xs font-mono text-muted-foreground">
+          {language || 'code'}
+        </span>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleCopy}
+          className="h-6 px-2 text-xs gap-1"
+        >
+          {isCopied ? (
+            <>
+              <Check className="w-3 h-3" />
+              Copied
+            </>
+          ) : (
+            <>
+              <Copy className="w-3 h-3" />
+              Copy
+            </>
+          )}
+        </Button>
+      </div>
+      <pre className="p-3 overflow-x-auto text-xs sm:text-sm">
+        <code className="font-mono text-foreground/90 break-words whitespace-pre-wrap">
+          {code}
+        </code>
+      </pre>
+    </div>
+  )
 }
