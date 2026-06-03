@@ -720,3 +720,133 @@ h2,
     animation: none;
   }
 }
+
+/* Shimmer animation for placeholder text */
+@keyframes shimmer-placeholder {
+  0%, 100% {
+    opacity: 0.5;
+    text-shadow: none;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 
+      0 0 8px var(--primary),
+      0 0 16px var(--primary),
+      0 0 24px color-mix(in srgb, var(--primary) 50%, transparent);
+    filter: brightness(1.1);
+  }
+}
+
+.placeholder-shimmer {
+  animation: shimmer-placeholder 2.5s ease-in-out infinite;
+  font-weight: 500;
+}
+
+/* Apply shimmer to textarea placeholder when no content */
+.chat-input-area textarea.placeholder-shimmer::placeholder {
+  animation: shimmer-placeholder 2.5s ease-in-out infinite;
+  opacity: 1;
+}
+
+/* Mic button pulsing ring animation */
+@keyframes mic-pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.mic-btn-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mic-btn-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--primary);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mic-btn-container.listening .mic-btn-ring {
+  animation: mic-pulse-ring 1.5s ease-out infinite;
+}
+
+.mic-btn {
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s ease;
+}
+
+.mic-btn:hover {
+  transform: scale(1.05);
+}
+
+.mic-btn:active {
+  transform: scale(0.95);
+}
+
+.mic-btn-container.listening .mic-btn {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  animation: mic-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes mic-glow {
+  from {
+    box-shadow: 0 0 8px var(--primary), 0 0 16px var(--primary);
+  }
+  to {
+    box-shadow: 0 0 16px var(--primary), 0 0 32px var(--primary), 0 0 48px color-mix(in srgb, var(--primary) 50%, transparent);
+  }
+}
+
+/* Mic button wave animation when recording */
+@keyframes mic-wave {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.mic-btn-container.recording .mic-btn-ring:nth-child(1) {
+  animation: mic-pulse-ring 1s ease-out infinite;
+  animation-delay: 0s;
+}
+
+.mic-btn-container.recording .mic-btn-ring:nth-child(2) {
+  animation: mic-pulse-ring 1s ease-out infinite;
+  animation-delay: 0.3s;
+}
+
+.mic-btn-container.recording .mic-btn-ring:nth-child(3) {
+  animation: mic-pulse-ring 1s ease-out infinite;
+  animation-delay: 0.6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .placeholder-shimmer,
+  .chat-input-area textarea.placeholder-shimmer::placeholder,
+  .mic-btn-container.listening .mic-btn-ring,
+  .mic-btn-container.recording .mic-btn-ring {
+    animation: none;
+  }
+  
+  .mic-btn-container.listening .mic-btn {
+    box-shadow: 0 0 16px var(--primary);
+  }
+}
