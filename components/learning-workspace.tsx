@@ -12,14 +12,19 @@ import { Button } from '@/components/ui/button'
 import { WorksheetCanvas } from '@/components/worksheet-canvas'
 import { ChatPanel } from '@/components/chat-panel'
 import { StudySheet } from '@/components/study-sheet'
+import { SettingsModal } from '@/components/settings-modal'
+import { useTheme } from '@/lib/theme-context'
 import { cn } from '@/lib/utils'
 
 export function LearningWorkspace() {
   const [worksheetContent, setWorksheetContent] = useState('')
   const [selectedText, setSelectedText] = useState('')
   const [showStudySheet, setShowStudySheet] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
+  
+  const { theme } = useTheme()
 
   const handleMessagesUpdate = useCallback((messages: Array<{ role: string; content: string }>) => {
     setChatMessages(messages.map(m => ({ 
@@ -38,10 +43,16 @@ export function LearningWorkspace() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* Sunset stripe - only shows in Mistral theme */}
+      <div className="sunset-stripe w-full flex-shrink-0" />
+      
       {/* Top header bar */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-card/50 backdrop-blur-sm">
+      <header className="flex items-center justify-between px-6 py-3 border-b border-border bg-card">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+          <div className={cn(
+            "w-9 h-9 rounded-lg flex items-center justify-center",
+            theme === 'mistral' ? "bg-primary" : "bg-accent-teal"
+          )}>
             <GraduationCap className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
@@ -56,7 +67,7 @@ export function LearningWorkspace() {
             size="sm"
             onClick={() => setShowStudySheet(true)}
             disabled={!worksheetContent && chatMessages.length === 0}
-            className="border-border/50 hover:bg-secondary/50"
+            className="h-8 text-sm"
           >
             <FileText className="w-4 h-4 mr-2" />
             Study Sheet
@@ -64,7 +75,8 @@ export function LearningWorkspace() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setShowSettings(true)}
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
           >
             <Settings className="w-4 h-4" />
           </Button>
@@ -75,7 +87,7 @@ export function LearningWorkspace() {
       <main className="flex-1 flex overflow-hidden">
         {/* Worksheet canvas (left side) */}
         <div className={cn(
-          "border-r border-border/50 bg-card/30 transition-all duration-300 ease-in-out flex flex-col",
+          "border-r border-border bg-card transition-all duration-300 ease-in-out flex flex-col",
           isCanvasCollapsed ? "w-0 opacity-0" : "w-1/2 opacity-100"
         )}>
           {!isCanvasCollapsed && (
@@ -94,8 +106,8 @@ export function LearningWorkspace() {
             size="sm"
             onClick={() => setIsCanvasCollapsed(!isCanvasCollapsed)}
             className={cn(
-              "h-12 w-6 p-0 rounded-none border-y border-border/30",
-              "bg-secondary/30 hover:bg-secondary/50 text-muted-foreground",
+              "h-12 w-6 p-0 rounded-none border-y border-border",
+              "bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground",
               "flex items-center justify-center"
             )}
           >
@@ -109,7 +121,7 @@ export function LearningWorkspace() {
 
         {/* Chat panel (right side) */}
         <div className={cn(
-          "bg-card/20 flex flex-col transition-all duration-300 ease-in-out",
+          "bg-background flex flex-col transition-all duration-300 ease-in-out",
           isCanvasCollapsed ? "flex-1" : "w-1/2"
         )}>
           <ChatPanel
@@ -121,6 +133,9 @@ export function LearningWorkspace() {
         </div>
       </main>
 
+      {/* Bottom sunset stripe - only shows in Mistral theme */}
+      <div className="sunset-stripe w-full flex-shrink-0" />
+
       {/* Study sheet modal */}
       {showStudySheet && (
         <StudySheet
@@ -128,6 +143,11 @@ export function LearningWorkspace() {
           chatHistory={chatMessages}
           onClose={() => setShowStudySheet(false)}
         />
+      )}
+
+      {/* Settings modal */}
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} />
       )}
     </div>
   )
