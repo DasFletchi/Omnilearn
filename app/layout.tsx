@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/lib/theme-context'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Lumina | AI Learning Assistant',
+  title: 'OmniLearn',
   description: 'Your intelligent study companion that explains, simplifies, and helps you master any subject with structured learning artifacts.',
   generator: 'v0.app',
   keywords: ['AI', 'learning', 'study', 'education', 'assistant', 'tutor'],
