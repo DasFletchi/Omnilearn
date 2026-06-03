@@ -22,9 +22,11 @@ function getStoredTheme(): ThemeVariant {
 }
 
 function getStoredIntroLoaderPreference() {
-  if (typeof window === 'undefined') return true
+  if (typeof window === 'undefined') return false
 
-  return window.localStorage.getItem('lumina-intro-loader') !== 'off'
+  const stored = window.localStorage.getItem('lumina-intro-loader')
+  // Default to 'off', only show if explicitly turned 'on'
+  return stored === 'on'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -70,7 +72,7 @@ export function useTheme() {
     context ?? {
       theme: 'perplexity' as ThemeVariant,
       setTheme: () => undefined,
-      showIntroLoader: true,
+      showIntroLoader: false,
       setShowIntroLoader: () => undefined,
     }
   )
