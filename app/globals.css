@@ -132,8 +132,8 @@
   --chart-4: #FACC15;
   --chart-5: #FDE68A;
 
-  /* Radius - Soft editorial */
-  --radius: 20px;
+  /* Radius - ANGULAR/SHARP for Mistral */
+  --radius: 0px;
 
   /* Sidebar */
   --sidebar: var(--cream);
@@ -411,8 +411,10 @@
 [data-theme="mistral"] textarea,
 [data-theme="mistral"] [role="dialog"],
 [data-theme="mistral"] .rounded-lg,
-[data-theme="mistral"] .rounded-md {
-  border-radius: var(--radius);
+[data-theme="mistral"] .rounded-md,
+[data-theme="mistral"] .rounded-xl,
+[data-theme="mistral"] [class*="rounded"] {
+  border-radius: 0px !important;
 }
 
 [data-theme="chatgpt"] body {
@@ -450,7 +452,7 @@
 }
 
 [data-theme="mistral"] .chat-panel {
-  border-radius: calc(var(--radius) + 8px);
+  border-radius: 0px;
   overflow: hidden;
   background: rgb(27 28 33 / 82%);
 }
@@ -614,7 +616,7 @@ h2,
     radial-gradient(ellipse 1200px 500px at 100% 100%, rgb(255 106 42 / 28%) 0%, transparent 40%),
     radial-gradient(ellipse 800px 600px at 50% 50%, rgb(250 204 21 / 18%) 0%, transparent 50%);
   background-size: 100% 100%, 200% 200%, 200% 200%, 300% 300%;
-  animation: mistral-cloud-drift 45s ease-in-out infinite;
+  animation: mistral-cloud-drift 12s ease-in-out infinite;
 }
 
 [data-theme="mistral"] .learning-workspace::after {
@@ -653,10 +655,67 @@ h2,
   }
 }
 
+/* Liquid morphing button animation */
+@keyframes liquid-morph {
+  0%, 100% {
+    border-radius: 0%;
+    transform: translate(0, 0) scale(1);
+  }
+  20% {
+    border-radius: 32% 68% 68% 32% / 32% 68% 32% 68%;
+    transform: translate(2px, -2px) scale(1.02);
+  }
+  40% {
+    border-radius: 68% 32% 32% 68% / 68% 32% 68% 32%;
+    transform: translate(-2px, 1px) scale(0.98);
+  }
+  60% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    transform: translate(1px, 2px) scale(1.01);
+  }
+  80% {
+    border-radius: 60% 40% 30% 70% / 60% 50% 50% 40%;
+    transform: translate(-1px, -1px) scale(0.99);
+  }
+}
+
+.liquid-morph-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FACC15 100%);
+  background-size: 200% 200%;
+  animation: liquid-morph 4s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.liquid-morph-btn:hover {
+  background-size: 300% 300%;
+  box-shadow: 0 0 50px rgba(249, 115, 22, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.liquid-morph-btn::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-200%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .intro-loader,
   .intro-loader-orbit,
   .intro-loader-sparkle,
+  .liquid-morph-btn,
   [data-theme="mistral"] .learning-workspace::before {
     animation: none;
   }
