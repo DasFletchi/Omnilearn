@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useChat } from 'ai/react'
 import { 
   GraduationCap, 
   FileText, 
@@ -20,14 +19,14 @@ export function LearningWorkspace() {
   const [selectedText, setSelectedText] = useState('')
   const [showStudySheet, setShowStudySheet] = useState(false)
   const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
+  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
 
-  const { messages } = useChat({
-    api: '/api/chat',
-    body: {
-      worksheetContext: worksheetContent,
-      provider: 'mistral'
-    },
-  })
+  const handleMessagesUpdate = useCallback((messages: Array<{ role: string; content: string }>) => {
+    setChatMessages(messages.map(m => ({ 
+      role: m.role as 'user' | 'assistant', 
+      content: m.content 
+    })))
+  }, [])
 
   const handleSelectionChange = useCallback((selection: string) => {
     setSelectedText(selection)
@@ -56,7 +55,7 @@ export function LearningWorkspace() {
             variant="outline"
             size="sm"
             onClick={() => setShowStudySheet(true)}
-            disabled={!worksheetContent && messages.length === 0}
+            disabled={!worksheetContent && chatMessages.length === 0}
             className="border-border/50 hover:bg-secondary/50"
           >
             <FileText className="w-4 h-4 mr-2" />
@@ -117,6 +116,7 @@ export function LearningWorkspace() {
             worksheetContent={worksheetContent}
             selectedText={selectedText}
             onClearSelection={handleClearSelection}
+            onMessagesUpdate={handleMessagesUpdate}
           />
         </div>
       </main>
@@ -125,10 +125,7 @@ export function LearningWorkspace() {
       {showStudySheet && (
         <StudySheet
           worksheetContent={worksheetContent}
-          chatHistory={messages.map(m => ({ 
-            role: m.role as 'user' | 'assistant', 
-            content: m.content 
-          }))}
+          chatHistory={chatMessages}
           onClose={() => setShowStudySheet(false)}
         />
       )}

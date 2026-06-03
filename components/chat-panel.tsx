@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, FormEvent } from 'react'
-import { useChat } from 'ai/react'
+import { useChat } from '@ai-sdk/react'
 import { 
   Send, 
   Lightbulb, 
@@ -23,6 +23,7 @@ interface ChatPanelProps {
   worksheetContent: string
   selectedText?: string
   onClearSelection?: () => void
+  onMessagesUpdate?: (messages: Array<{ role: string; content: string }>) => void
 }
 
 const quickActions: { id: QuickAction; label: string; icon: React.ElementType; description: string }[] = [
@@ -33,7 +34,7 @@ const quickActions: { id: QuickAction; label: string; icon: React.ElementType; d
   { id: 'examples', label: 'Examples', icon: FileText, description: 'Show real-world uses' },
 ]
 
-export function ChatPanel({ worksheetContent, selectedText, onClearSelection }: ChatPanelProps) {
+export function ChatPanel({ worksheetContent, selectedText, onClearSelection, onMessagesUpdate }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [activeQuickAction, setActiveQuickAction] = useState<QuickAction | null>(null)
@@ -55,10 +56,11 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection }: 
     },
   })
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom and notify parent of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    onMessagesUpdate?.(messages.map(m => ({ role: m.role, content: m.content })))
+  }, [messages, onMessagesUpdate])
 
   // Handle quick action click
   const handleQuickAction = useCallback(async (action: QuickAction) => {
@@ -88,7 +90,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection }: 
   // Handle form submit
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!(input ?? '').trim()) return
     handleSubmit(e)
   }, [input, handleSubmit])
 
@@ -96,7 +98,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection }: 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (input.trim()) {
+      if ((input ?? '').trim()) {
         const form = e.currentTarget.form
         if (form) {
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
@@ -257,7 +259,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection }: 
           <Button
             type="submit"
             size="sm"
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || !(input ?? '').trim()}
             className={cn(
               "absolute right-2 bottom-2 h-8 w-8 p-0",
               "bg-primary hover:bg-primary/90 text-primary-foreground",
