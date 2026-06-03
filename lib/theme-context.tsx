@@ -12,43 +12,56 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+
 const themes: ThemeVariant[] = ['perplexity', 'mistral', 'dark', 'chatgpt']
 
 function getStoredTheme(): ThemeVariant {
   if (typeof window === 'undefined') return 'mistral'
 
-  const storedTheme = window.localStorage.getItem('lumina-theme') as ThemeVariant | null
-  return storedTheme && themes.includes(storedTheme) ? storedTheme : 'mistral'
+  const stored = window.localStorage.getItem('lumina-theme') as ThemeVariant | null
+
+  return stored && themes.includes(stored) ? stored : 'mistral'
 }
 
-function getStoredIntroLoaderPreference() {
+function getStoredIntroLoaderPreference(): boolean {
   if (typeof window === 'undefined') return false
 
-  const stored = window.localStorage.getItem('lumina-intro-loader')
-  // Default to 'off', only show if explicitly turned 'on'
-  return stored === 'on'
+  return window.localStorage.getItem('lumina-intro-loader') === 'on'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<ThemeVariant>(getStoredTheme)
-  const [showIntroLoader, setShowIntroLoader] = useState(getStoredIntroLoaderPreference)
+  // HARD DEFAULTS (SSR safe, no hydration chaos)
+  const [theme, setTheme] = useState<ThemeVariant>('mistral')
+  const [showIntroLoader, setShowIntroLoader] = useState(false)
   const [mounted, setMounted] = useState(false)
 
+  // Hydration step: load real values AFTER mount
   useEffect(() => {
+    const storedTheme = getStoredTheme()
+    const storedIntro = getStoredIntroLoaderPreference()
+
+    setTheme(storedTheme)
+    setShowIntroLoader(storedIntro)
+
     setMounted(true)
   }, [])
 
+  // Apply theme to DOM + persist
   useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('lumina-theme', theme)
-      document.documentElement.setAttribute('data-theme', theme)
-    }
+    if (!mounted) return
+
+    localStorage.setItem('lumina-theme', theme)
+    document.documentElement.setAttribute('data-theme', theme)
   }, [theme, mounted])
 
+  // Persist intro loader
   useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('lumina-intro-loader', showIntroLoader ? 'on' : 'off')
-    }
+    if (!mounted) return
+
+    localStorage.setItem(
+      'lumina-intro-loader',
+      showIntroLoader ? 'on' : 'off'
+    )
   }, [showIntroLoader, mounted])
 
   return (
@@ -68,12 +81,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext)
 
-  return (
-    context ?? {
+  if (!context) {
+    return {
       theme: 'mistral' as ThemeVariant,
-      setTheme: () => undefined,
+      setTheme: () => {},
       showIntroLoader: false,
-      setShowIntroLoader: () => undefined,
+      setShowIntroLoader: () => {},
     }
-  )
+  }
+
+  return context
 }
