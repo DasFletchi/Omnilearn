@@ -1,7 +1,8 @@
 'use client'
 
-import { X, Palette, Check } from 'lucide-react'
+import { X, Palette, Check, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { useTheme, type ThemeVariant } from '@/lib/theme-context'
 import { cn } from '@/lib/utils'
 
@@ -19,24 +20,36 @@ const themes: { id: ThemeVariant; name: string; description: string; colors: str
   {
     id: 'mistral',
     name: 'Mistral',
-    description: 'Sunset orange with cream tones',
-    colors: ['#F97316', '#FEF9E7', '#0F0F0F', '#D6CDB7'],
+    description: 'Dark cinematic Mistral look with animated gradient bars',
+    colors: ['#141519', '#FF6A2A', '#FACC15', '#5A1D12'],
+  },
+  {
+    id: 'dark',
+    name: 'Dark',
+    description: 'Calm dark mode with high contrast surfaces',
+    colors: ['#0B0F14', '#111827', '#F9FAFB', '#38BDF8'],
+  },
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT Minimal',
+    description: 'Centered, flat, Arial-first interface with quiet loading states',
+    colors: ['#FFFFFF', '#000000', '#8E8EA0', '#F48120'],
   },
 ]
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, showIntroLoader, setShowIntroLoader } = useTheme()
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
-      <div className="relative w-full max-w-md mx-4 bg-background rounded-lg border border-border shadow-xl">
+      <div className="relative w-full max-w-md mx-4 bg-background rounded-lg border border-border shadow-xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-semibold text-foreground">Settings</h2>
@@ -52,14 +65,15 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
         {/* Content */}
         <div className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Palette className="w-4 h-4" />
-              <span>Theme</span>
-            </div>
+          <div className="space-y-6">
+            <section className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Palette className="w-4 h-4" />
+                <span>Theme</span>
+              </div>
 
-            <div className="space-y-3">
-              {themes.map((t) => (
+              <div className="space-y-3">
+                {themes.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTheme(t.id)}
@@ -81,7 +95,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Color preview */}
                   <div className="flex gap-1.5 mt-3">
                     {t.colors.map((color, i) => (
@@ -93,8 +107,29 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                     ))}
                   </div>
                 </button>
-              ))}
-            </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Sparkles className="w-4 h-4" />
+                <span>Start animation</span>
+              </div>
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/20 p-4">
+                <div className="space-y-1">
+                  <div className="text-sm font-medium text-foreground">Mini loading screen</div>
+                  <p className="text-sm text-muted-foreground">
+                    Shows a short premium intro before the workspace appears.
+                  </p>
+                </div>
+                <Switch
+                  checked={showIntroLoader}
+                  onCheckedChange={setShowIntroLoader}
+                  aria-label="Toggle mini loading screen"
+                />
+              </div>
+            </section>
           </div>
         </div>
 

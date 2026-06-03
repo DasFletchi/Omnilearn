@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { 
-  GraduationCap, 
-  FileText, 
+import { useState, useCallback, useEffect, useRef } from 'react'
+import {
+  FileText,
   Settings,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Sparkles
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WorksheetCanvas } from '@/components/worksheet-canvas'
@@ -23,13 +23,30 @@ export function LearningWorkspace() {
   const [showSettings, setShowSettings] = useState(false)
   const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
-  
-  const { theme } = useTheme()
+  const [showIntro, setShowIntro] = useState(false)
+  const hasPlayedIntro = useRef(false)
+  const { showIntroLoader } = useTheme()
+
+  useEffect(() => {
+    if (!showIntroLoader || hasPlayedIntro.current) {
+      setShowIntro(false)
+      return
+    }
+
+    hasPlayedIntro.current = true
+    setShowIntro(true)
+
+    const timeout = window.setTimeout(() => {
+      setShowIntro(false)
+    }, 1200)
+
+    return () => window.clearTimeout(timeout)
+  }, [showIntroLoader])
 
   const handleMessagesUpdate = useCallback((messages: Array<{ role: string; content: string }>) => {
-    setChatMessages(messages.map(m => ({ 
-      role: m.role as 'user' | 'assistant', 
-      content: m.content 
+    setChatMessages(messages.map(m => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content
     })))
   }, [])
 
@@ -42,25 +59,13 @@ export function LearningWorkspace() {
   }, [])
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="learning-workspace relative isolate h-screen flex flex-col bg-background overflow-hidden">
+      {showIntro && <IntroLoader />}
       {/* Sunset stripe - only shows in Mistral theme */}
-      <div className="sunset-stripe w-full flex-shrink-0" />
-      
-      {/* Top header bar */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-border bg-card">
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            "w-9 h-9 rounded-lg flex items-center justify-center",
-            theme === 'mistral' ? "bg-primary" : "bg-accent-teal"
-          )}>
-            <GraduationCap className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground tracking-tight">Lumina</h1>
-            <p className="text-xs text-muted-foreground">AI Learning Assistant</p>
-          </div>
-        </div>
+      <div className="sunset-stripe relative z-10 w-full flex-shrink-0" />
 
+      {/* Top header bar */}
+      <header className="workspace-header relative z-10 flex items-center justify-end px-6 py-3 border-b border-border bg-card">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -84,10 +89,10 @@ export function LearningWorkspace() {
       </header>
 
       {/* Main content area - split screen */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="workspace-main relative z-10 flex-1 flex overflow-hidden">
         {/* Worksheet canvas (left side) */}
         <div className={cn(
-          "border-r border-border bg-card transition-all duration-300 ease-in-out flex flex-col",
+          "worksheet-panel border-r border-border bg-card transition-all duration-300 ease-in-out flex flex-col",
           isCanvasCollapsed ? "w-0 opacity-0" : "w-1/2 opacity-100"
         )}>
           {!isCanvasCollapsed && (
@@ -121,7 +126,7 @@ export function LearningWorkspace() {
 
         {/* Chat panel (right side) */}
         <div className={cn(
-          "bg-background flex flex-col transition-all duration-300 ease-in-out",
+          "chat-shell bg-background flex flex-col transition-all duration-300 ease-in-out",
           isCanvasCollapsed ? "flex-1" : "w-1/2"
         )}>
           <ChatPanel
@@ -134,7 +139,7 @@ export function LearningWorkspace() {
       </main>
 
       {/* Bottom sunset stripe - only shows in Mistral theme */}
-      <div className="sunset-stripe w-full flex-shrink-0" />
+      <div className="sunset-stripe relative z-10 w-full flex-shrink-0" />
 
       {/* Study sheet modal */}
       {showStudySheet && (
@@ -149,6 +154,21 @@ export function LearningWorkspace() {
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} />
       )}
+    </div>
+  )
+}
+
+function IntroLoader() {
+  return (
+    <div className="intro-loader" role="status" aria-live="polite" aria-label="Loading workspace">
+      <div className="intro-loader-card">
+        <div className="intro-loader-orbit" aria-hidden="true">
+          <Sparkles className="intro-loader-sparkle" />
+        </div>
+        <p className="intro-loader-kicker">AI Learning Assistant</p>
+        <h1 className="intro-loader-title">Lerne smarter.</h1>
+        <p className="intro-loader-subtitle">Dein Workspace wird vorbereitet.</p>
+      </div>
     </div>
   )
 }
