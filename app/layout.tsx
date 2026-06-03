@@ -1,31 +1,7 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Lora, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/lib/theme-context'
 import './globals.css'
-
-// Inter for UI (Perplexity uses pplxSans, Inter is close)
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: '--font-sans',
-  display: 'swap',
-})
-
-// Lora for editorial display (Mistral theme)
-const lora = Lora({ 
-  subsets: ["latin"],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-serif',
-  display: 'swap',
-})
-
-// JetBrains Mono for code blocks
-const jetbrainsMono = JetBrains_Mono({ 
-  subsets: ["latin"],
-  weight: ['400', '500'],
-  variable: '--font-mono',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: 'Lumina | AI Learning Assistant',
@@ -48,7 +24,6 @@ export default function RootLayout({
   return (
     <html 
       lang="en" 
-      className={`${inter.variable} ${lora.variable} ${jetbrainsMono.variable}`}
       data-theme="perplexity"
       suppressHydrationWarning
     >
