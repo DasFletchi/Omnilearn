@@ -15,10 +15,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 const themes: ThemeVariant[] = ['perplexity', 'mistral', 'dark', 'chatgpt']
 
 function getStoredTheme(): ThemeVariant {
-  if (typeof window === 'undefined') return 'perplexity'
+  if (typeof window === 'undefined') return 'mistral'
 
   const storedTheme = window.localStorage.getItem('lumina-theme') as ThemeVariant | null
-  return storedTheme && themes.includes(storedTheme) ? storedTheme : 'perplexity'
+  return storedTheme && themes.includes(storedTheme) ? storedTheme : 'mistral'
 }
 
 function getStoredIntroLoaderPreference() {
@@ -70,7 +70,7 @@ export function useTheme() {
 
   return (
     context ?? {
-      theme: 'perplexity' as ThemeVariant,
+      theme: 'mistral' as ThemeVariant,
       setTheme: () => undefined,
       showIntroLoader: false,
       setShowIntroLoader: () => undefined,
