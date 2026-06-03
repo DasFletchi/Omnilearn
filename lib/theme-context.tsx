@@ -50,7 +50,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [showIntroLoader, mounted])
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, showIntroLoader, setShowIntroLoader }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+        showIntroLoader,
+        setShowIntroLoader,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   )
@@ -59,10 +66,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext)
 
-  return context ?? {
-    theme: 'perplexity' as ThemeVariant,
-    setTheme: () => undefined,
-    showIntroLoader: true,
-    setShowIntroLoader: () => undefined,
-  }
+  return (
+    context ?? {
+      theme: 'perplexity' as ThemeVariant,
+      setTheme: () => undefined,
+      showIntroLoader: true,
+      setShowIntroLoader: () => undefined,
+    }
+  )
 }
