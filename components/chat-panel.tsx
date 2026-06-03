@@ -127,16 +127,12 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
   const showEmptyState = messages.length === 0
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="chat-panel h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
-        <div className="flex items-center gap-3">
+      <div className="chat-panel-header flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+        <div className="flex items-center gap-3" aria-label="AI chat">
           <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-foreground">Lumina</h2>
-            <p className="text-xs text-muted-foreground">Your study companion</p>
           </div>
         </div>
         {messages.length > 0 && (
@@ -153,7 +149,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto bg-background">
+      <div className="chat-messages flex-1 overflow-y-auto bg-background">
         {showEmptyState ? (
           <div className="h-full flex flex-col items-center justify-center p-8 text-center">
             <div className="w-16 h-16 rounded-xl bg-secondary border border-border flex items-center justify-center mb-6">
@@ -255,7 +251,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       )}
 
       {/* Input area */}
-      <div className="p-4 border-t border-border bg-card">
+      <div className="chat-input-area p-4 border-t border-border bg-card">
         <form onSubmit={onSubmit} className="relative">
           <textarea
             ref={inputRef}

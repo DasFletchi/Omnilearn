@@ -2,25 +2,38 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-export type ThemeVariant = 'perplexity' | 'mistral'
+export type ThemeVariant = 'perplexity' | 'mistral' | 'dark' | 'chatgpt'
 
 interface ThemeContextType {
   theme: ThemeVariant
   setTheme: (theme: ThemeVariant) => void
+  showIntroLoader: boolean
+  setShowIntroLoader: (showIntroLoader: boolean) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+const themes: ThemeVariant[] = ['perplexity', 'mistral', 'dark', 'chatgpt']
+
+function getStoredTheme(): ThemeVariant {
+  if (typeof window === 'undefined') return 'perplexity'
+
+  const storedTheme = window.localStorage.getItem('lumina-theme') as ThemeVariant | null
+  return storedTheme && themes.includes(storedTheme) ? storedTheme : 'perplexity'
+}
+
+function getStoredIntroLoaderPreference() {
+  if (typeof window === 'undefined') return true
+
+  return window.localStorage.getItem('lumina-intro-loader') !== 'off'
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<ThemeVariant>('perplexity')
+  const [theme, setTheme] = useState<ThemeVariant>(getStoredTheme)
+  const [showIntroLoader, setShowIntroLoader] = useState(getStoredIntroLoaderPreference)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    const stored = localStorage.getItem('lumina-theme') as ThemeVariant | null
-    if (stored && (stored === 'perplexity' || stored === 'mistral')) {
-      setTheme(stored)
-    }
   }, [])
 
   useEffect(() => {
@@ -30,12 +43,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme, mounted])
 
-  if (!mounted) {
-    return <>{children}</>
-  }
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('lumina-intro-loader', showIntroLoader ? 'on' : 'off')
+    }
+  }, [showIntroLoader, mounted])
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+        showIntroLoader,
+        setShowIntroLoader,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   )
@@ -44,8 +66,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext)
 
-  return context ?? {
-    theme: 'perplexity' as ThemeVariant,
-    setTheme: () => undefined,
-  }
+  return (
+    context ?? {
+      theme: 'perplexity' as ThemeVariant,
+      setTheme: () => undefined,
+      showIntroLoader: true,
+      setShowIntroLoader: () => undefined,
+    }
+  )
 }
