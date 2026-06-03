@@ -1,6 +1,6 @@
 'use client'
 
-import { X, Palette, Check, Sparkles } from 'lucide-react'
+import { X, Palette, Check, Sparkles, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useTheme, type ThemeVariant } from '@/lib/theme-context'
@@ -20,7 +20,7 @@ const themes: { id: ThemeVariant; name: string; description: string; colors: str
   {
     id: 'mistral',
     name: 'Mistral',
-    description: 'Dark cinematic Mistral look with animated gradient bars',
+    description: 'Dark cinematic Mistral look with angular UI',
     colors: ['#141519', '#FF6A2A', '#FACC15', '#5A1D12'],
   },
   {
@@ -78,10 +78,11 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   key={t.id}
                   onClick={() => setTheme(t.id)}
                   className={cn(
-                    "w-full p-4 rounded-lg border text-left transition-all",
+                    "w-full p-4 border text-left transition-all",
                     theme === t.id
                       ? "border-primary bg-primary/5 ring-1 ring-primary"
-                      : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
+                      : "border-border hover:border-muted-foreground/30 hover:bg-muted/30",
+                    theme === 'mistral' ? 'rounded-none' : 'rounded-lg'
                   )}
                 >
                   <div className="flex items-start justify-between">
@@ -101,8 +102,11 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                     {t.colors.map((color, i) => (
                       <div
                         key={i}
-                        className="w-6 h-6 rounded-md border border-border/50"
-                        style={{ backgroundColor: color }}
+                        className="w-6 h-6 border border-border/50"
+                        style={{ 
+                          backgroundColor: color,
+                          borderRadius: theme === 'mistral' ? '0px' : '8px'
+                        }}
                       />
                     ))}
                   </div>
@@ -116,7 +120,11 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                 <Sparkles className="w-4 h-4" />
                 <span>Start animation</span>
               </div>
-              <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/20 p-4">
+              <div className={cn(
+                "flex items-center justify-between gap-4 border p-4",
+                "bg-muted/20",
+                theme === 'mistral' ? 'rounded-none' : 'rounded-lg'
+              )}>
                 <div className="space-y-1">
                   <div className="text-sm font-medium text-foreground">Mini loading screen</div>
                   <p className="text-sm text-muted-foreground">
@@ -130,11 +138,37 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                 />
               </div>
             </section>
+
+            {/* New Liquid Morph Button Section for Mistral Theme */}
+            {theme === 'mistral' && (
+              <section className="space-y-3 border-t border-border pt-6">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Zap className="w-4 h-4" />
+                  <span>Approach</span>
+                </div>
+                <div className="p-4 border rounded-none bg-muted/20">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Try the new liquid morphing button with fluid shape-shifting animation
+                  </p>
+                  <Button 
+                    className={cn(
+                      "liquid-morph-btn w-full font-semibold text-white",
+                      "rounded-none border-0"
+                    )}
+                  >
+                    <span className="relative z-10">New Approach</span>
+                  </Button>
+                </div>
+              </section>
+            )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-border bg-muted/20 rounded-b-lg">
+        <div className={cn(
+          "px-6 py-4 border-t border-border bg-muted/20",
+          theme === 'mistral' ? 'rounded-b-none' : 'rounded-b-lg'
+        )}>
           <p className="text-xs text-muted-foreground text-center">
             Theme preference is saved automatically
           </p>
