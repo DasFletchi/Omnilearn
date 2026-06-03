@@ -101,56 +101,56 @@ export function WorksheetCanvas({
     return (
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <FileText className="w-4 h-4 text-primary" />
+        <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-background">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+              <FileText className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-semibold text-foreground">Study Material</h2>
-              <p className="text-xs text-muted-foreground">Your learning workspace</p>
+              <h2 className="font-serif font-semibold text-foreground text-lg">Study Material</h2>
+              <p className="text-sm text-slate">Your learning workspace</p>
             </div>
           </div>
         </div>
 
         {/* Empty state content */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-10">
           <div className="text-center max-w-md">
-            <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mx-auto mb-6">
-              <BookOpen className="w-8 h-8 text-muted-foreground" />
+            <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mx-auto mb-8">
+              <BookOpen className="w-10 h-10 text-slate" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+            <h3 className="text-2xl font-serif font-semibold text-foreground mb-3 text-balance">
               No study material yet
             </h3>
-            <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            <p className="text-slate text-base mb-8 leading-relaxed">
               Add your study content to get started. You can paste notes, upload documents, 
               or load a sample to see how Lumina works.
             </p>
             <div className="flex flex-col gap-3">
               <Button 
                 onClick={handleLoadSample}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="w-full bg-primary hover:bg-primary-deep text-primary-foreground rounded-md h-11 text-base font-medium transition-editorial"
               >
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-5 h-5 mr-2" />
                 Load Sample Content
               </Button>
               <Button 
                 variant="outline" 
-                className="w-full border-border/50 hover:bg-secondary/50"
+                className="w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial"
                 onClick={() => {
                   setIsEditing(true)
                   setEditContent('')
                 }}
               >
-                <Edit3 className="w-4 h-4 mr-2" />
+                <Edit3 className="w-5 h-5 mr-2" />
                 Write Your Own
               </Button>
               <Button 
                 variant="ghost" 
-                className="w-full text-muted-foreground hover:text-foreground"
+                className="w-full text-slate hover:text-foreground hover:bg-cream rounded-md h-11 text-base transition-editorial"
                 disabled
               >
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="w-5 h-5 mr-2" />
                 Upload Document (Coming Soon)
               </Button>
             </div>
@@ -165,43 +165,43 @@ export function WorksheetCanvas({
     return (
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
-              <Edit3 className="w-4 h-4 text-accent" />
+        <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-background">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+              <Edit3 className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-semibold text-foreground">Editing</h2>
-              <p className="text-xs text-muted-foreground">Markdown supported</p>
+              <h2 className="font-serif font-semibold text-foreground text-lg">Editing</h2>
+              <p className="text-sm text-slate">Markdown supported</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm"
               onClick={handleCancelEdit}
-              className="text-muted-foreground hover:text-foreground"
+              className="rounded-md border-border hover:bg-cream hover:border-beige-deep text-slate hover:text-foreground transition-editorial"
             >
-              <X className="w-4 h-4 mr-1" />
+              <X className="w-4 h-4 mr-1.5" />
               Cancel
             </Button>
             <Button 
               size="sm"
               onClick={handleSaveEdit}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-primary hover:bg-primary-deep text-primary-foreground rounded-md transition-editorial"
             >
-              <Save className="w-4 h-4 mr-1" />
+              <Save className="w-4 h-4 mr-1.5" />
               Save
             </Button>
           </div>
         </div>
 
         {/* Editor */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-8">
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className="w-full h-full bg-secondary/30 rounded-xl p-4 text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono text-sm leading-relaxed"
+            className="w-full h-full bg-cream border border-beige-deep rounded-lg p-5 text-foreground placeholder:text-stone resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm leading-relaxed transition-editorial"
             placeholder="Paste or type your study material here...
 
 You can use Markdown formatting:
@@ -221,26 +221,26 @@ You can use Markdown formatting:
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <FileText className="w-4 h-4 text-primary" />
+      <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-background">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+            <FileText className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="font-semibold text-foreground">Study Material</h2>
-            <p className="text-xs text-muted-foreground">Select text to ask about it</p>
+            <h2 className="font-serif font-semibold text-foreground text-lg">Study Material</h2>
+            <p className="text-sm text-slate">Select text to ask about it</p>
           </div>
         </div>
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="sm"
           onClick={() => {
             setEditContent(content)
             setIsEditing(true)
           }}
-          className="text-muted-foreground hover:text-foreground"
+          className="rounded-md border-border hover:bg-cream hover:border-beige-deep text-slate hover:text-foreground transition-editorial"
         >
-          <Edit3 className="w-4 h-4 mr-1" />
+          <Edit3 className="w-4 h-4 mr-1.5" />
           Edit
         </Button>
       </div>
@@ -248,12 +248,12 @@ You can use Markdown formatting:
       {/* Content */}
       <div 
         className={cn(
-          "flex-1 overflow-y-auto p-6",
+          "flex-1 overflow-y-auto p-8",
           isLoading && "opacity-50 pointer-events-none"
         )}
         onMouseUp={handleTextSelection}
       >
-        <div className="prose prose-invert prose-sm max-w-none">
+        <div className="prose prose-lg max-w-none">
           <MarkdownRenderer content={content} />
         </div>
       </div>
@@ -271,15 +271,12 @@ function MarkdownRenderer({ content }: { content: string }) {
   let codeContent: string[] = []
 
   const processInlineFormatting = (text: string): React.ReactNode => {
-    // Process bold, italic, code, etc.
     const parts: React.ReactNode[] = []
     let remaining = text
     let key = 0
 
     while (remaining.length > 0) {
-      // Bold
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/)
-      // Code
       const codeMatch = remaining.match(/`([^`]+)`/)
       
       const matches = [
@@ -301,7 +298,7 @@ function MarkdownRenderer({ content }: { content: string }) {
           parts.push(<strong key={key++} className="font-semibold text-foreground">{match[1]}</strong>)
         } else if (type === 'code' && match) {
           parts.push(
-            <code key={key++} className="px-1.5 py-0.5 rounded bg-secondary/80 text-accent font-mono text-xs">
+            <code key={key++} className="px-1.5 py-0.5 rounded-md bg-surface-code text-on-dark font-mono text-sm">
               {match[1]}
             </code>
           )
@@ -324,8 +321,8 @@ function MarkdownRenderer({ content }: { content: string }) {
     if (line.startsWith('```')) {
       if (inCodeBlock) {
         elements.push(
-          <pre key={i} className="bg-secondary/50 rounded-lg p-4 overflow-x-auto my-4">
-            <code className="text-sm font-mono text-foreground/90">
+          <pre key={i} className="bg-surface-code rounded-lg p-5 overflow-x-auto my-5">
+            <code className="text-sm font-mono text-on-dark">
               {codeContent.join('\n')}
             </code>
           </pre>
@@ -347,7 +344,7 @@ function MarkdownRenderer({ content }: { content: string }) {
     if (line.includes('|') && line.trim().startsWith('|')) {
       const cells = line.split('|').slice(1, -1).map(c => c.trim())
       if (cells.some(c => /^-+$/.test(c))) {
-        continue // Skip separator row
+        continue
       }
       if (!inTable) {
         inTable = true
@@ -356,14 +353,13 @@ function MarkdownRenderer({ content }: { content: string }) {
       tableRows.push(cells)
       continue
     } else if (inTable) {
-      // End table
       elements.push(
-        <div key={`table-${i}`} className="overflow-x-auto my-4">
+        <div key={`table-${i}`} className="overflow-x-auto my-5">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-border">
+              <tr className="border-b-2 border-border">
                 {tableRows[0]?.map((cell, j) => (
-                  <th key={j} className="text-left py-2 px-3 text-sm font-semibold text-foreground">
+                  <th key={j} className="text-left py-3 px-4 text-base font-semibold text-foreground">
                     {processInlineFormatting(cell)}
                   </th>
                 ))}
@@ -371,9 +367,9 @@ function MarkdownRenderer({ content }: { content: string }) {
             </thead>
             <tbody>
               {tableRows.slice(1).map((row, j) => (
-                <tr key={j} className="border-b border-border/50">
+                <tr key={j} className="border-b border-border">
                   {row.map((cell, k) => (
-                    <td key={k} className="py-2 px-3 text-sm text-foreground/80">
+                    <td key={k} className="py-3 px-4 text-base text-charcoal">
                       {processInlineFormatting(cell)}
                     </td>
                   ))}
@@ -390,19 +386,19 @@ function MarkdownRenderer({ content }: { content: string }) {
     // Headers
     if (line.startsWith('# ')) {
       elements.push(
-        <h1 key={i} className="text-2xl font-bold text-foreground mt-6 mb-4 font-serif">
+        <h1 key={i} className="text-4xl font-serif font-bold text-foreground mt-8 mb-5 first:mt-0 tracking-tight" style={{ letterSpacing: '-0.5px', lineHeight: '1.15' }}>
           {processInlineFormatting(line.slice(2))}
         </h1>
       )
     } else if (line.startsWith('## ')) {
       elements.push(
-        <h2 key={i} className="text-xl font-semibold text-foreground mt-5 mb-3 font-serif">
+        <h2 key={i} className="text-2xl font-serif font-semibold text-foreground mt-7 mb-4" style={{ letterSpacing: '-0.5px', lineHeight: '1.2' }}>
           {processInlineFormatting(line.slice(3))}
         </h2>
       )
     } else if (line.startsWith('### ')) {
       elements.push(
-        <h3 key={i} className="text-lg font-semibold text-foreground mt-4 mb-2">
+        <h3 key={i} className="text-xl font-semibold text-foreground mt-5 mb-3" style={{ lineHeight: '1.25' }}>
           {processInlineFormatting(line.slice(4))}
         </h3>
       )
@@ -410,25 +406,25 @@ function MarkdownRenderer({ content }: { content: string }) {
     // Lists
     else if (line.match(/^[-*] /)) {
       elements.push(
-        <li key={i} className="text-foreground/80 ml-4 my-1 list-disc">
+        <li key={i} className="text-charcoal ml-5 my-1.5 list-disc text-base" style={{ lineHeight: '1.55' }}>
           {processInlineFormatting(line.slice(2))}
         </li>
       )
     } else if (line.match(/^\d+\. /)) {
       elements.push(
-        <li key={i} className="text-foreground/80 ml-4 my-1 list-decimal">
+        <li key={i} className="text-charcoal ml-5 my-1.5 list-decimal text-base" style={{ lineHeight: '1.55' }}>
           {processInlineFormatting(line.replace(/^\d+\. /, ''))}
         </li>
       )
     }
     // Empty line
     else if (line.trim() === '') {
-      elements.push(<div key={i} className="h-3" />)
+      elements.push(<div key={i} className="h-4" />)
     }
     // Regular paragraph
     else {
       elements.push(
-        <p key={i} className="text-foreground/80 leading-relaxed my-2">
+        <p key={i} className="text-charcoal text-base my-3" style={{ lineHeight: '1.55' }}>
           {processInlineFormatting(line)}
         </p>
       )
@@ -438,12 +434,12 @@ function MarkdownRenderer({ content }: { content: string }) {
   // Handle remaining table
   if (inTable && tableRows.length > 0) {
     elements.push(
-      <div key="table-end" className="overflow-x-auto my-4">
+      <div key="table-end" className="overflow-x-auto my-5">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-border">
+            <tr className="border-b-2 border-border">
               {tableRows[0]?.map((cell, j) => (
-                <th key={j} className="text-left py-2 px-3 text-sm font-semibold text-foreground">
+                <th key={j} className="text-left py-3 px-4 text-base font-semibold text-foreground">
                   {processInlineFormatting(cell)}
                 </th>
               ))}
@@ -451,9 +447,9 @@ function MarkdownRenderer({ content }: { content: string }) {
           </thead>
           <tbody>
             {tableRows.slice(1).map((row, j) => (
-              <tr key={j} className="border-b border-border/50">
+              <tr key={j} className="border-b border-border">
                 {row.map((cell, k) => (
-                  <td key={k} className="py-2 px-3 text-sm text-foreground/80">
+                  <td key={k} className="py-3 px-4 text-base text-charcoal">
                     {processInlineFormatting(cell)}
                   </td>
                 ))}

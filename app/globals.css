@@ -4,53 +4,91 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Premium dark academic theme */
-  --background: oklch(0.11 0.01 240);
-  --foreground: oklch(0.95 0.01 240);
-  --card: oklch(0.14 0.015 240);
-  --card-foreground: oklch(0.95 0.01 240);
-  --popover: oklch(0.12 0.015 240);
-  --popover-foreground: oklch(0.95 0.01 240);
-  --primary: oklch(0.7 0.15 220);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.18 0.015 240);
-  --secondary-foreground: oklch(0.85 0.01 240);
-  --muted: oklch(0.2 0.01 240);
-  --muted-foreground: oklch(0.6 0.02 240);
-  --accent: oklch(0.75 0.12 180);
-  --accent-foreground: oklch(0.12 0.01 240);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.25 0.02 240);
-  --input: oklch(0.18 0.015 240);
-  --ring: oklch(0.7 0.15 220);
-  --chart-1: oklch(0.7 0.15 220);
-  --chart-2: oklch(0.75 0.12 180);
-  --chart-3: oklch(0.65 0.14 280);
-  --chart-4: oklch(0.8 0.1 140);
-  --chart-5: oklch(0.7 0.18 40);
-  --radius: 0.75rem;
+  /* Mistral AI Design System */
   
-  /* Glass effect tokens */
-  --glass: oklch(0.15 0.02 240 / 0.6);
-  --glass-border: oklch(0.35 0.02 240 / 0.3);
-  --glass-highlight: oklch(0.8 0.1 220 / 0.1);
+  /* Brand & Accent - Sunset palette */
+  --primary: #F97316;
+  --primary-deep: #EA580C;
+  --sunshine-300: #FDBA74;
+  --sunshine-500: #FB923C;
+  --sunshine-700: #EA580C;
+  --sunshine-800: #C2410C;
+  --sunshine-900: #9A3412;
+  --yellow-saturated: #FACC15;
   
-  /* Sidebar tokens */
-  --sidebar: oklch(0.09 0.015 240);
-  --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.7 0.15 220);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.16 0.015 240);
-  --sidebar-accent-foreground: oklch(0.95 0.01 240);
-  --sidebar-border: oklch(0.22 0.02 240);
-  --sidebar-ring: oklch(0.7 0.15 220);
+  /* Cream / Neutral Warm */
+  --cream: #FEF9E7;
+  --cream-soft: #FFFBEB;
+  --cream-deeper: #FDE68A;
+  --beige-deep: #D6CDB7;
+  
+  /* Surface */
+  --canvas: #FFFFFF;
+  --surface: #FAFAFA;
+  --surface-cream: #FEF7E0;
+  --surface-code: #1C1C1E;
+  --hairline: #E5E5E5;
+  --hairline-soft: #F0F0F0;
+  --hairline-strong: #D4D4D4;
+  
+  /* Text */
+  --ink: #0F0F0F;
+  --ink-tint: #1A1A1A;
+  --charcoal: #262626;
+  --slate: #525252;
+  --steel: #737373;
+  --stone: #A3A3A3;
+  --muted: #D4D4D4;
+  --on-dark: #FFFFFF;
+  --on-dark-muted: rgba(255, 255, 255, 0.7);
+  --on-cream: #0F0F0F;
+  --on-primary: #FFFFFF;
+  
+  /* Semantic tokens mapped to shadcn/ui */
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--canvas);
+  --card-foreground: var(--ink);
+  --popover: var(--canvas);
+  --popover-foreground: var(--ink);
+  --primary-foreground: var(--on-primary);
+  --secondary: var(--cream);
+  --secondary-foreground: var(--on-cream);
+  --muted-foreground: var(--slate);
+  --accent: var(--cream);
+  --accent-foreground: var(--on-cream);
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: var(--hairline);
+  --input: var(--hairline-strong);
+  --ring: var(--primary);
+  
+  /* Chart colors */
+  --chart-1: var(--primary);
+  --chart-2: var(--sunshine-500);
+  --chart-3: var(--sunshine-700);
+  --chart-4: var(--yellow-saturated);
+  --chart-5: var(--cream-deeper);
+  
+  /* Radius - Editorial, sober geometry */
+  --radius: 12px;
+  --radius-button: 8px;
+  
+  /* Sidebar - Cream theme */
+  --sidebar: var(--cream);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--on-primary);
+  --sidebar-accent: var(--cream-soft);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--beige-deep);
+  --sidebar-ring: var(--primary);
 }
 
 @theme inline {
-  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --font-serif: 'IBM Plex Serif', Georgia, serif;
-  --font-mono: 'IBM Plex Mono', 'Geist Mono', monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: 'PP Editorial Old', 'Times New Roman', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -75,8 +113,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: var(--radius-button);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
@@ -87,9 +125,28 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --color-glass: var(--glass);
-  --color-glass-border: var(--glass-border);
-  --color-glass-highlight: var(--glass-highlight);
+  
+  /* Custom Mistral colors */
+  --color-cream: var(--cream);
+  --color-cream-soft: var(--cream-soft);
+  --color-cream-deeper: var(--cream-deeper);
+  --color-beige-deep: var(--beige-deep);
+  --color-surface-cream: var(--surface-cream);
+  --color-surface-code: var(--surface-code);
+  --color-ink: var(--ink);
+  --color-ink-tint: var(--ink-tint);
+  --color-charcoal: var(--charcoal);
+  --color-slate: var(--slate);
+  --color-steel: var(--steel);
+  --color-stone: var(--stone);
+  --color-on-dark: var(--on-dark);
+  --color-on-dark-muted: var(--on-dark-muted);
+  --color-sunshine-300: var(--sunshine-300);
+  --color-sunshine-500: var(--sunshine-500);
+  --color-sunshine-700: var(--sunshine-700);
+  --color-sunshine-800: var(--sunshine-800);
+  --color-sunshine-900: var(--sunshine-900);
+  --color-yellow-saturated: var(--yellow-saturated);
 }
 
 @layer base {
@@ -101,10 +158,10 @@
   }
 }
 
-/* Custom scrollbar for premium feel */
+/* Custom scrollbar - subtle for editorial feel */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -112,65 +169,68 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.3 0.02 240);
-  border-radius: 3px;
+  background: var(--stone);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.4 0.02 240);
+  background: var(--slate);
 }
 
-/* Glass panel effect */
-.glass-panel {
-  background: linear-gradient(
-    135deg,
-    oklch(0.15 0.02 240 / 0.7) 0%,
-    oklch(0.12 0.015 240 / 0.5) 100%
-  );
-  backdrop-filter: blur(20px);
-  border: 1px solid oklch(0.35 0.02 240 / 0.2);
-  box-shadow: 
-    0 4px 32px oklch(0 0 0 / 0.3),
-    inset 0 1px 0 oklch(1 0 0 / 0.05);
-}
-
-/* Subtle glow effect for focus states */
-.focus-glow:focus-within {
-  box-shadow: 
-    0 0 0 2px oklch(0.7 0.15 220 / 0.3),
-    0 4px 32px oklch(0.7 0.15 220 / 0.1);
-}
-
-/* Smooth transitions for all interactive elements */
-.transition-premium {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Animation for loading states */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.shimmer {
+/* Sunset stripe band - Mistral's signature element */
+.sunset-stripe {
   background: linear-gradient(
     90deg,
-    oklch(0.18 0.015 240) 0%,
-    oklch(0.25 0.02 240) 50%,
-    oklch(0.18 0.015 240) 100%
+    var(--primary) 0%,
+    var(--sunshine-700) 25%,
+    var(--sunshine-500) 50%,
+    var(--yellow-saturated) 75%,
+    var(--cream) 100%
   );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+  height: 6px;
 }
 
-/* Typing cursor animation */
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+/* Card with cream background */
+.card-cream {
+  background: var(--cream);
+  border: 1px solid var(--beige-deep);
+  border-radius: var(--radius);
 }
 
-.typing-cursor::after {
-  content: '▋';
-  animation: blink 1s step-end infinite;
-  color: oklch(0.7 0.15 220);
+/* Subtle elevation for cards */
+.elevation-card {
+  box-shadow: rgba(0, 0, 0, 0.04) 0px 4px 12px 0px;
+}
+
+.elevation-mockup {
+  box-shadow: rgba(0, 0, 0, 0.08) 0px 12px 24px -4px;
+}
+
+/* Smooth transitions */
+.transition-editorial {
+  transition: all 0.15s ease;
+}
+
+/* Typography utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+}
+
+/* Code block styling */
+.code-block {
+  background: var(--surface-code);
+  color: var(--on-dark);
+  border-radius: var(--radius-button);
+  font-family: var(--font-mono);
 }

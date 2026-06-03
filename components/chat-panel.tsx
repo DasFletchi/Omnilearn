@@ -69,7 +69,6 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     setActiveQuickAction(action)
     const contextToUse = selectedText || worksheetContent
     
-    // Create a user message that describes the action
     const actionLabels: Record<QuickAction, string> = {
       explain: 'Explain this to me',
       simplify: 'Simplify this for me',
@@ -108,20 +107,19 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     }
   }, [input])
 
-  // Empty state
   const showEmptyState = messages.length === 0
 
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-accent" />
+      <div className="flex items-center justify-between px-8 py-5 border-b border-beige-deep bg-cream">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="font-semibold text-foreground">Lumina</h2>
-            <p className="text-xs text-muted-foreground">Your study companion</p>
+            <h2 className="font-serif font-semibold text-foreground text-lg">Lumina</h2>
+            <p className="text-sm text-slate">Your study companion</p>
           </div>
         </div>
         {messages.length > 0 && (
@@ -130,7 +128,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             size="sm"
             onClick={() => reload()}
             disabled={isLoading}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-slate hover:text-foreground hover:bg-cream-deeper rounded-md transition-editorial"
           >
             <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
           </Button>
@@ -138,28 +136,27 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-cream-soft">
         {showEmptyState ? (
-          <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-6">
-              <Bot className="w-8 h-8 text-primary" />
+          <div className="h-full flex flex-col items-center justify-center p-10 text-center">
+            <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mb-8">
+              <Bot className="w-10 h-10 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+            <h3 className="text-2xl font-serif font-semibold text-foreground mb-3 text-balance">
               Ready to help you learn
             </h3>
-            <p className="text-muted-foreground text-sm mb-6 max-w-xs leading-relaxed">
+            <p className="text-slate text-base mb-8 max-w-sm leading-relaxed">
               Ask me anything about your study material, or use the quick actions below to get started.
             </p>
             
-            {/* Quick action hints */}
             {worksheetContent && (
-              <div className="text-xs text-muted-foreground">
-                <span className="text-primary">Tip:</span> Select text in the worksheet to ask about specific parts
+              <div className="text-sm text-slate">
+                <span className="text-primary font-medium">Tip:</span> Select text in the worksheet to ask about specific parts
               </div>
             )}
           </div>
         ) : (
-          <div className="p-4 space-y-4">
+          <div className="p-6 space-y-5">
             {messages.map((message, index) => (
               <MessageBubble 
                 key={message.id || index} 
@@ -169,12 +166,12 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             ))}
             
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-primary" />
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-5 h-5 text-primary" />
                 </div>
-                <div className="flex-1 bg-secondary/30 rounded-2xl rounded-tl-md p-4">
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex-1 bg-cream border border-beige-deep rounded-lg rounded-tl-none p-5">
+                  <div className="flex items-center gap-3 text-slate">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span className="text-sm">Thinking...</span>
                   </div>
@@ -189,11 +186,11 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
       {/* Selected text indicator */}
       {selectedText && (
-        <div className="mx-4 mb-3 p-3 bg-primary/10 border border-primary/20 rounded-xl">
-          <div className="flex items-start justify-between gap-2">
+        <div className="mx-6 mb-4 p-4 bg-cream border border-primary rounded-lg">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-primary mb-1">Selected text:</p>
-              <p className="text-xs text-foreground/80 line-clamp-2">
+              <p className="text-xs font-medium text-primary mb-1.5">Selected text:</p>
+              <p className="text-sm text-foreground line-clamp-2">
                 {selectedText}
               </p>
             </div>
@@ -201,7 +198,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
               variant="ghost"
               size="sm"
               onClick={onClearSelection}
-              className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground flex-shrink-0"
+              className="h-6 w-6 p-0 text-slate hover:text-foreground hover:bg-cream-deeper flex-shrink-0 rounded-md"
             >
               ×
             </Button>
@@ -211,7 +208,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
       {/* Quick actions */}
       {worksheetContent && (
-        <div className="px-4 pb-3">
+        <div className="px-6 pb-4 bg-cream-soft">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {quickActions.map((action) => (
               <Button
@@ -221,9 +218,10 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
                 onClick={() => handleQuickAction(action.id)}
                 disabled={isLoading || (!worksheetContent && !selectedText)}
                 className={cn(
-                  "flex-shrink-0 border-border/50 hover:bg-secondary/50 hover:border-primary/30",
-                  "text-muted-foreground hover:text-foreground transition-all",
-                  activeQuickAction === action.id && "bg-primary/10 border-primary/30 text-primary"
+                  "flex-shrink-0 rounded-md border-border bg-background",
+                  "hover:bg-cream hover:border-beige-deep",
+                  "text-slate hover:text-foreground transition-editorial",
+                  activeQuickAction === action.id && "bg-primary border-primary text-primary-foreground hover:bg-primary-deep hover:text-primary-foreground"
                 )}
               >
                 <action.icon className="w-3.5 h-3.5 mr-1.5" />
@@ -235,7 +233,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       )}
 
       {/* Input area */}
-      <div className="p-4 border-t border-border/50">
+      <div className="p-6 border-t border-beige-deep bg-cream">
         <form onSubmit={onSubmit} className="relative">
           <textarea
             ref={inputRef}
@@ -248,11 +246,11 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             disabled={isLoading}
             rows={1}
             className={cn(
-              "w-full bg-secondary/50 rounded-xl px-4 py-3 pr-12 text-foreground",
-              "placeholder:text-muted-foreground resize-none",
-              "focus:outline-none focus:ring-2 focus:ring-primary/30",
+              "w-full bg-background rounded-md px-4 py-3 pr-14 text-foreground",
+              "border border-border placeholder:text-stone",
+              "resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary",
               "disabled:opacity-50 disabled:cursor-not-allowed",
-              "min-h-[48px] max-h-[120px]"
+              "min-h-[48px] max-h-[120px] transition-editorial"
             )}
             style={{ height: 'auto' }}
           />
@@ -261,9 +259,9 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             size="sm"
             disabled={isLoading || !(input ?? '').trim()}
             className={cn(
-              "absolute right-2 bottom-2 h-8 w-8 p-0",
-              "bg-primary hover:bg-primary/90 text-primary-foreground",
-              "disabled:opacity-50 disabled:cursor-not-allowed"
+              "absolute right-2 bottom-2 h-9 w-9 p-0 rounded-md",
+              "bg-primary hover:bg-primary-deep text-primary-foreground",
+              "disabled:opacity-50 disabled:cursor-not-allowed transition-editorial"
             )}
           >
             <Send className="w-4 h-4" />
@@ -279,25 +277,27 @@ function MessageBubble({ role, content }: { role: 'user' | 'assistant'; content:
   const isUser = role === 'user'
 
   return (
-    <div className={cn("flex items-start gap-3", isUser && "flex-row-reverse")}>
+    <div className={cn("flex items-start gap-4", isUser && "flex-row-reverse")}>
       <div className={cn(
-        "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-        isUser ? "bg-secondary" : "bg-primary/10"
+        "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 border",
+        isUser 
+          ? "bg-ink border-ink" 
+          : "bg-cream border-beige-deep"
       )}>
         {isUser ? (
-          <User className="w-4 h-4 text-foreground" />
+          <User className="w-5 h-5 text-on-dark" />
         ) : (
-          <Bot className="w-4 h-4 text-primary" />
+          <Bot className="w-5 h-5 text-primary" />
         )}
       </div>
       <div className={cn(
-        "flex-1 rounded-2xl p-4 max-w-[85%]",
+        "flex-1 rounded-lg p-5 max-w-[85%]",
         isUser 
-          ? "bg-primary text-primary-foreground rounded-tr-md ml-auto" 
-          : "bg-secondary/30 text-foreground rounded-tl-md"
+          ? "bg-ink text-on-dark rounded-tr-none ml-auto" 
+          : "bg-cream border border-beige-deep text-foreground rounded-tl-none"
       )}>
         {isUser ? (
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+          <p className="text-base leading-relaxed whitespace-pre-wrap">{content}</p>
         ) : (
           <AssistantMessage content={content} />
         )}
@@ -339,7 +339,7 @@ function AssistantMessage({ content }: { content: string }) {
           parts.push(<strong key={key++} className="font-semibold">{match[1]}</strong>)
         } else if (type === 'code' && match) {
           parts.push(
-            <code key={key++} className="px-1 py-0.5 rounded bg-background/50 text-accent font-mono text-xs">
+            <code key={key++} className="px-1.5 py-0.5 rounded-md bg-surface-code text-on-dark font-mono text-sm">
               {match[1]}
             </code>
           )
@@ -360,44 +360,44 @@ function AssistantMessage({ content }: { content: string }) {
 
     if (line.startsWith('# ')) {
       elements.push(
-        <h3 key={i} className="text-base font-semibold mt-3 mb-2 first:mt-0">
+        <h3 key={i} className="text-lg font-serif font-semibold mt-4 mb-2 first:mt-0">
           {processInlineFormatting(line.slice(2))}
         </h3>
       )
     } else if (line.startsWith('## ')) {
       elements.push(
-        <h4 key={i} className="text-sm font-semibold mt-3 mb-1.5 first:mt-0">
+        <h4 key={i} className="text-base font-semibold mt-4 mb-2 first:mt-0">
           {processInlineFormatting(line.slice(3))}
         </h4>
       )
     } else if (line.startsWith('> ')) {
       elements.push(
-        <blockquote key={i} className="border-l-2 border-primary/50 pl-3 my-2 text-sm italic text-foreground/80">
+        <blockquote key={i} className="border-l-2 border-primary pl-4 my-3 text-base italic text-slate">
           {processInlineFormatting(line.slice(2))}
         </blockquote>
       )
     } else if (line.match(/^[-*] /)) {
       elements.push(
-        <li key={i} className="text-sm ml-4 my-0.5 list-disc">
+        <li key={i} className="text-base ml-5 my-1 list-disc">
           {processInlineFormatting(line.slice(2))}
         </li>
       )
     } else if (line.match(/^\d+\. /)) {
       elements.push(
-        <li key={i} className="text-sm ml-4 my-0.5 list-decimal">
+        <li key={i} className="text-base ml-5 my-1 list-decimal">
           {processInlineFormatting(line.replace(/^\d+\. /, ''))}
         </li>
       )
     } else if (line.trim() === '') {
-      elements.push(<div key={i} className="h-2" />)
+      elements.push(<div key={i} className="h-3" />)
     } else {
       elements.push(
-        <p key={i} className="text-sm leading-relaxed my-1">
+        <p key={i} className="text-base leading-relaxed my-2">
           {processInlineFormatting(line)}
         </p>
       )
     }
   }
 
-  return <div className="space-y-0.5">{elements}</div>
+  return <div className="space-y-1">{elements}</div>
 }

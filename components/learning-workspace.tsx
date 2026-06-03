@@ -38,25 +38,28 @@ export function LearningWorkspace() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* Sunset stripe - Mistral's signature element */}
+      <div className="sunset-stripe w-full flex-shrink-0" />
+      
       {/* Top header bar */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-card/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+      <header className="flex items-center justify-between px-8 py-4 border-b border-border bg-background">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
             <GraduationCap className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-foreground tracking-tight">Lumina</h1>
-            <p className="text-xs text-muted-foreground">AI Learning Assistant</p>
+            <h1 className="text-xl font-serif font-semibold text-foreground tracking-tight">Lumina</h1>
+            <p className="text-sm text-slate">AI Learning Assistant</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowStudySheet(true)}
             disabled={!worksheetContent && chatMessages.length === 0}
-            className="border-border/50 hover:bg-secondary/50"
+            className="rounded-md border-border hover:bg-cream hover:border-beige-deep transition-editorial"
           >
             <FileText className="w-4 h-4 mr-2" />
             Study Sheet
@@ -64,7 +67,7 @@ export function LearningWorkspace() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-slate hover:text-foreground hover:bg-cream rounded-md transition-editorial"
           >
             <Settings className="w-4 h-4" />
           </Button>
@@ -75,7 +78,7 @@ export function LearningWorkspace() {
       <main className="flex-1 flex overflow-hidden">
         {/* Worksheet canvas (left side) */}
         <div className={cn(
-          "border-r border-border/50 bg-card/30 transition-all duration-300 ease-in-out flex flex-col",
+          "border-r border-border bg-background transition-all duration-300 ease-in-out flex flex-col",
           isCanvasCollapsed ? "w-0 opacity-0" : "w-1/2 opacity-100"
         )}>
           {!isCanvasCollapsed && (
@@ -94,9 +97,9 @@ export function LearningWorkspace() {
             size="sm"
             onClick={() => setIsCanvasCollapsed(!isCanvasCollapsed)}
             className={cn(
-              "h-12 w-6 p-0 rounded-none border-y border-border/30",
-              "bg-secondary/30 hover:bg-secondary/50 text-muted-foreground",
-              "flex items-center justify-center"
+              "h-12 w-6 p-0 rounded-none border-y border-border",
+              "bg-cream hover:bg-cream-deeper text-slate hover:text-foreground",
+              "flex items-center justify-center transition-editorial"
             )}
           >
             {isCanvasCollapsed ? (
@@ -109,7 +112,7 @@ export function LearningWorkspace() {
 
         {/* Chat panel (right side) */}
         <div className={cn(
-          "bg-card/20 flex flex-col transition-all duration-300 ease-in-out",
+          "bg-surface-cream flex flex-col transition-all duration-300 ease-in-out",
           isCanvasCollapsed ? "flex-1" : "w-1/2"
         )}>
           <ChatPanel
@@ -120,6 +123,9 @@ export function LearningWorkspace() {
           />
         </div>
       </main>
+
+      {/* Bottom sunset stripe */}
+      <div className="sunset-stripe w-full flex-shrink-0" />
 
       {/* Study sheet modal */}
       {showStudySheet && (

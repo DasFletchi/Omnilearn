@@ -1,24 +1,29 @@
 import type { Metadata, Viewport } from 'next'
-import { IBM_Plex_Sans, IBM_Plex_Serif, IBM_Plex_Mono } from 'next/font/google'
+import { Inter, Lora, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const ibmPlexSans = IBM_Plex_Sans({ 
+// Inter for UI prose (body, navigation, buttons, labels)
+const inter = Inter({ 
   subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-sans'
+  variable: '--font-sans',
+  display: 'swap',
 })
 
-const ibmPlexSerif = IBM_Plex_Serif({ 
+// Lora as PP Editorial Old substitute (elegant serif for display)
+const lora = Lora({ 
   subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-serif'
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-serif',
+  display: 'swap',
 })
 
-const ibmPlexMono = IBM_Plex_Mono({ 
+// JetBrains Mono for code blocks
+const jetbrainsMono = JetBrains_Mono({ 
   subsets: ["latin"],
   weight: ['400', '500'],
-  variable: '--font-mono'
+  variable: '--font-mono',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -46,7 +51,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1a1c2e',
+  themeColor: '#F97316',
   width: 'device-width',
   initialScale: 1,
 }
@@ -57,8 +62,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable}`}>
-      <body className="font-sans antialiased bg-background">
+    <html lang="en" className={`${inter.variable} ${lora.variable} ${jetbrainsMono.variable} bg-background`}>
+      <body className="font-sans antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

@@ -81,32 +81,31 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
     window.print()
   }, [])
 
-  // Check if there's any content
   const hasContent = worksheetContent || extractedInsights
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-      <div className="w-full max-w-4xl max-h-[90vh] bg-card rounded-2xl border border-border/50 shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-ink/60 backdrop-blur-sm">
+      <div className="w-full max-w-4xl max-h-[90vh] bg-background rounded-lg border border-border elevation-mockup flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-primary" />
+        <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-cream">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
+              <FileText className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Study Sheet</h2>
-              <p className="text-xs text-muted-foreground">Your learning summary</p>
+              <h2 className="text-xl font-serif font-semibold text-foreground">Study Sheet</h2>
+              <p className="text-sm text-slate">Your learning summary</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={handleCopy}
-              className="border-border/50 hover:bg-secondary/50"
+              className="rounded-md border-border hover:bg-cream-soft hover:border-beige-deep transition-editorial"
             >
               {copied ? (
-                <Check className="w-4 h-4 mr-1.5 text-green-500" />
+                <Check className="w-4 h-4 mr-1.5 text-green-600" />
               ) : (
                 <Copy className="w-4 h-4 mr-1.5" />
               )}
@@ -116,7 +115,7 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
               variant="outline"
               size="sm"
               onClick={handlePrint}
-              className="border-border/50 hover:bg-secondary/50"
+              className="rounded-md border-border hover:bg-cream-soft hover:border-beige-deep transition-editorial"
             >
               <Printer className="w-4 h-4 mr-1.5" />
               Print
@@ -124,7 +123,7 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
             <Button
               size="sm"
               onClick={handleDownload}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-primary hover:bg-primary-deep text-primary-foreground rounded-md transition-editorial"
             >
               <Download className="w-4 h-4 mr-1.5" />
               Download
@@ -133,7 +132,7 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground ml-2"
+              className="text-slate hover:text-foreground hover:bg-cream-soft rounded-md ml-2 transition-editorial"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -141,31 +140,31 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 print:p-8">
+        <div className="flex-1 overflow-y-auto p-8 print:p-10 bg-background">
           {!hasContent ? (
-            <div className="h-full flex flex-col items-center justify-center text-center py-12">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-6">
-                <BookOpen className="w-8 h-8 text-muted-foreground" />
+            <div className="h-full flex flex-col items-center justify-center text-center py-16">
+              <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mb-8">
+                <BookOpen className="w-10 h-10 text-slate" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <h3 className="text-2xl font-serif font-semibold text-foreground mb-3">
                 No content yet
               </h3>
-              <p className="text-muted-foreground text-sm max-w-sm">
+              <p className="text-slate text-base max-w-sm leading-relaxed">
                 Add study material and chat with Lumina to generate your personalized study sheet.
               </p>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-10">
               {/* Original Material Section */}
               {worksheetContent && (
                 <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    <h3 className="text-lg font-semibold text-foreground font-serif">
+                  <div className="flex items-center gap-3 mb-5">
+                    <BookOpen className="w-6 h-6 text-primary" />
+                    <h3 className="text-2xl font-serif font-semibold text-foreground" style={{ letterSpacing: '-0.5px' }}>
                       Original Material
                     </h3>
                   </div>
-                  <div className="bg-secondary/30 rounded-xl p-5 border border-border/30">
+                  <div className="bg-cream rounded-lg p-6 border border-beige-deep">
                     <StudySheetMarkdown content={worksheetContent} />
                   </div>
                 </section>
@@ -174,19 +173,19 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
               {/* AI Insights Section */}
               {extractedInsights && (
                 <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-accent" />
-                    <h3 className="text-lg font-semibold text-foreground font-serif">
+                  <div className="flex items-center gap-3 mb-5">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                    <h3 className="text-2xl font-serif font-semibold text-foreground" style={{ letterSpacing: '-0.5px' }}>
                       AI-Generated Insights
                     </h3>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {chatHistory
                       .filter(msg => msg.role === 'assistant')
                       .map((msg, index) => (
                         <div 
                           key={index} 
-                          className="bg-secondary/30 rounded-xl p-5 border border-border/30"
+                          className="bg-cream rounded-lg p-6 border border-beige-deep"
                         >
                           <StudySheetMarkdown content={msg.content} />
                         </div>
@@ -196,11 +195,11 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
               )}
 
               {/* Footer */}
-              <footer className="pt-6 border-t border-border/30 text-center">
-                <p className="text-xs text-muted-foreground">
+              <footer className="pt-8 border-t border-border text-center">
+                <p className="text-sm text-slate">
                   Generated by <span className="text-primary font-medium">Lumina</span> - Your AI Learning Assistant
                 </p>
-                <p className="text-xs text-muted-foreground/60 mt-1">
+                <p className="text-xs text-stone mt-2">
                   {new Date().toLocaleDateString('en-US', { 
                     year: 'numeric', 
                     month: 'long', 
@@ -218,7 +217,7 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
   )
 }
 
-// Markdown renderer for study sheet (simplified version)
+// Markdown renderer for study sheet
 function StudySheetMarkdown({ content }: { content: string }) {
   const lines = content.split('\n')
   const elements: React.ReactNode[] = []
@@ -251,7 +250,7 @@ function StudySheetMarkdown({ content }: { content: string }) {
           parts.push(<strong key={key++} className="font-semibold text-foreground">{match[1]}</strong>)
         } else if (type === 'code' && match) {
           parts.push(
-            <code key={key++} className="px-1.5 py-0.5 rounded bg-background/50 text-accent font-mono text-xs">
+            <code key={key++} className="px-1.5 py-0.5 rounded-md bg-surface-code text-on-dark font-mono text-sm">
               {match[1]}
             </code>
           )
@@ -272,47 +271,47 @@ function StudySheetMarkdown({ content }: { content: string }) {
 
     if (line.startsWith('# ')) {
       elements.push(
-        <h2 key={i} className="text-xl font-bold text-foreground mt-4 mb-3 first:mt-0 font-serif">
+        <h2 key={i} className="text-2xl font-serif font-bold text-foreground mt-5 mb-4 first:mt-0" style={{ letterSpacing: '-0.5px' }}>
           {processInlineFormatting(line.slice(2))}
         </h2>
       )
     } else if (line.startsWith('## ')) {
       elements.push(
-        <h3 key={i} className="text-lg font-semibold text-foreground mt-4 mb-2 font-serif">
+        <h3 key={i} className="text-xl font-serif font-semibold text-foreground mt-5 mb-3" style={{ letterSpacing: '-0.5px' }}>
           {processInlineFormatting(line.slice(3))}
         </h3>
       )
     } else if (line.startsWith('### ')) {
       elements.push(
-        <h4 key={i} className="text-base font-semibold text-foreground mt-3 mb-2">
+        <h4 key={i} className="text-lg font-semibold text-foreground mt-4 mb-2">
           {processInlineFormatting(line.slice(4))}
         </h4>
       )
     } else if (line.startsWith('> ')) {
       elements.push(
-        <blockquote key={i} className="border-l-3 border-primary/50 pl-4 my-3 text-foreground/80 italic">
+        <blockquote key={i} className="border-l-3 border-primary pl-5 my-4 text-charcoal italic" style={{ lineHeight: '1.55' }}>
           {processInlineFormatting(line.slice(2))}
         </blockquote>
       )
     } else if (line.match(/^[-*] /)) {
       elements.push(
-        <li key={i} className="text-foreground/80 ml-5 my-1 list-disc">
+        <li key={i} className="text-charcoal ml-6 my-1.5 list-disc text-base" style={{ lineHeight: '1.55' }}>
           {processInlineFormatting(line.slice(2))}
         </li>
       )
     } else if (line.match(/^\d+\. /)) {
       elements.push(
-        <li key={i} className="text-foreground/80 ml-5 my-1 list-decimal">
+        <li key={i} className="text-charcoal ml-6 my-1.5 list-decimal text-base" style={{ lineHeight: '1.55' }}>
           {processInlineFormatting(line.replace(/^\d+\. /, ''))}
         </li>
       )
     } else if (line.trim() === '') {
-      elements.push(<div key={i} className="h-2" />)
+      elements.push(<div key={i} className="h-3" />)
     } else if (line.trim() === '---') {
-      elements.push(<hr key={i} className="my-4 border-border/30" />)
+      elements.push(<hr key={i} className="my-5 border-border" />)
     } else {
       elements.push(
-        <p key={i} className="text-foreground/80 leading-relaxed my-2">
+        <p key={i} className="text-charcoal text-base my-2" style={{ lineHeight: '1.55' }}>
           {processInlineFormatting(line)}
         </p>
       )
