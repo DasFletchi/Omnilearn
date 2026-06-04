@@ -9,7 +9,12 @@ import {
   BookOpen,
   Sparkles,
   X,
-  Printer
+  Printer,
+  Image,
+  Upload,
+  File,
+  Trash2,
+  ExternalLink
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -18,10 +23,13 @@ interface StudySheetProps {
   worksheetContent: string
   chatHistory: { role: 'user' | 'assistant'; content: string }[]
   onClose: () => void
+  uploadedDocuments?: Array<{ id: string; name: string; thumbnail?: string; uploadedAt: Date }>
+  onUploadDocument?: () => void
 }
 
-export function StudySheet({ worksheetContent, chatHistory, onClose }: StudySheetProps) {
+export function StudySheet({ worksheetContent, chatHistory, onClose, uploadedDocuments = [], onUploadDocument }: StudySheetProps) {
   const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState<'content' | 'documents'>('content')
 
   // Extract key insights from chat history
   const extractedInsights = chatHistory
@@ -139,76 +147,192 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex items-center gap-1 px-8 border-b border-border bg-surface-secondary">
+          <button
+            onClick={() => setActiveTab('content')}
+            className={cn(
+              "px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+              activeTab === 'content'
+                ? "border-primary text-primary"
+                : "border-transparent text-slate hover:text-foreground"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Content
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={cn(
+              "px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+              activeTab === 'documents'
+                ? "border-primary text-primary"
+                : "border-transparent text-slate hover:text-foreground"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <Image className="w-4 h-4" />
+              Documents
+              {uploadedDocuments.length > 0 && (
+                <span className="px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
+                  {uploadedDocuments.length}
+                </span>
+              )}
+            </div>
+          </button>
+        </div>
+
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-8 print:p-10 bg-background">
-          {!hasContent ? (
-            <div className="h-full flex flex-col items-center justify-center text-center py-16">
-              <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mb-8">
-                <BookOpen className="w-10 h-10 text-slate" />
+          {activeTab === 'content' ? (
+            hasContent ? (
+              <div className="space-y-10">
+                {/* Original Material Section */}
+                {worksheetContent && (
+                  <section>
+                    <div className="flex items-center gap-3 mb-5">
+                      <BookOpen className="w-6 h-6 text-primary" />
+                      <h3 className="text-2xl font-serif font-semibold text-foreground" style={{ letterSpacing: '-0.5px' }}>
+                        Original Material
+                      </h3>
+                    </div>
+                    <div className="bg-cream rounded-lg p-6 border border-beige-deep">
+                      <StudySheetMarkdown content={worksheetContent} />
+                    </div>
+                  </section>
+                )}
+
+                {/* AI Insights Section */}
+                {extractedInsights && (
+                  <section>
+                    <div className="flex items-center gap-3 mb-5">
+                      <Sparkles className="w-6 h-6 text-primary" />
+                      <h3 className="text-2xl font-serif font-semibold text-foreground" style={{ letterSpacing: '-0.5px' }}>
+                        AI-Generated Insights
+                      </h3>
+                    </div>
+                    <div className="space-y-5">
+                      {chatHistory
+                        .filter(msg => msg.role === 'assistant')
+                        .map((msg, index) => (
+                          <div 
+                            key={index} 
+                            className="bg-cream rounded-lg p-6 border border-beige-deep"
+                          >
+                            <StudySheetMarkdown content={msg.content} />
+                          </div>
+                        ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Footer */}
+                <footer className="pt-8 border-t border-border text-center">
+                  <p className="text-sm text-slate">
+                    Generated by <span className="text-primary font-medium">Lumina</span> - Your AI Learning Assistant
+                  </p>
+                  <p className="text-xs text-stone mt-2">
+                    {new Date().toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </footer>
               </div>
-              <h3 className="text-2xl font-serif font-semibold text-foreground mb-3">
-                No content yet
-              </h3>
-              <p className="text-slate text-base max-w-sm leading-relaxed">
-                Add study material and chat with Lumina to generate your personalized study sheet.
-              </p>
-            </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center py-16">
+                <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mb-8">
+                  <BookOpen className="w-10 h-10 text-slate" />
+                </div>
+                <h3 className="text-2xl font-serif font-semibold text-foreground mb-3">
+                  No content yet
+                </h3>
+                <p className="text-slate text-base max-w-sm leading-relaxed">
+                  Add study material and chat with Lumina to generate your personalized study sheet.
+                </p>
+              </div>
+            )
           ) : (
-            <div className="space-y-10">
-              {/* Original Material Section */}
-              {worksheetContent && (
-                <section>
-                  <div className="flex items-center gap-3 mb-5">
-                    <BookOpen className="w-6 h-6 text-primary" />
-                    <h3 className="text-2xl font-serif font-semibold text-foreground" style={{ letterSpacing: '-0.5px' }}>
-                      Original Material
-                    </h3>
-                  </div>
-                  <div className="bg-cream rounded-lg p-6 border border-beige-deep">
-                    <StudySheetMarkdown content={worksheetContent} />
-                  </div>
-                </section>
-              )}
+            /* Documents Tab */
+            <div className="space-y-6">
+              {/* Upload Button */}
+              <div className="flex justify-end">
+                <Button
+                  onClick={onUploadDocument}
+                  className="bg-primary hover:bg-primary-deep text-primary-foreground rounded-md transition-editorial"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload New Document
+                </Button>
+              </div>
 
-              {/* AI Insights Section */}
-              {extractedInsights && (
-                <section>
-                  <div className="flex items-center gap-3 mb-5">
-                    <Sparkles className="w-6 h-6 text-primary" />
-                    <h3 className="text-2xl font-serif font-semibold text-foreground" style={{ letterSpacing: '-0.5px' }}>
-                      AI-Generated Insights
-                    </h3>
-                  </div>
-                  <div className="space-y-5">
-                    {chatHistory
-                      .filter(msg => msg.role === 'assistant')
-                      .map((msg, index) => (
-                        <div 
-                          key={index} 
-                          className="bg-cream rounded-lg p-6 border border-beige-deep"
-                        >
-                          <StudySheetMarkdown content={msg.content} />
+              {/* Documents Grid */}
+              {uploadedDocuments.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {uploadedDocuments.map((doc) => (
+                    <div 
+                      key={doc.id}
+                      className="bg-cream rounded-lg p-4 border border-beige-deep hover:border-primary transition-colors group"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-surface-secondary flex items-center justify-center flex-shrink-0">
+                          {doc.thumbnail ? (
+                            <img 
+                              src={doc.thumbnail} 
+                              alt={doc.name}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            <Image className="w-6 h-6 text-slate" />
+                          )}
                         </div>
-                      ))}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-foreground truncate">
+                            {doc.name}
+                          </h4>
+                          <p className="text-xs text-slate mt-1">
+                            {new Date(doc.uploadedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button className="text-xs text-primary hover:underline flex items-center gap-1">
+                          <ExternalLink className="w-3 h-3" />
+                          View
+                        </button>
+                        <button className="text-xs text-red-500 hover:underline flex items-center gap-1">
+                          <Trash2 className="w-3 h-3" />
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mb-8 mx-auto">
+                    <Image className="w-10 h-10 text-slate" />
                   </div>
-                </section>
+                  <h3 className="text-2xl font-serif font-semibold text-foreground mb-3">
+                    No documents uploaded
+                  </h3>
+                  <p className="text-slate text-base max-w-sm leading-relaxed mx-auto">
+                    Upload images of your study materials to add them to your worksheet.
+                  </p>
+                  <Button
+                    onClick={onUploadDocument}
+                    className="mt-6 bg-primary hover:bg-primary-deep text-primary-foreground rounded-md transition-editorial"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload First Document
+                  </Button>
+                </div>
               )}
-
-              {/* Footer */}
-              <footer className="pt-8 border-t border-border text-center">
-                <p className="text-sm text-slate">
-                  Generated by <span className="text-primary font-medium">Lumina</span> - Your AI Learning Assistant
-                </p>
-                <p className="text-xs text-stone mt-2">
-                  {new Date().toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </footer>
             </div>
           )}
         </div>

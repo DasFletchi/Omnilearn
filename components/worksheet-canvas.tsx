@@ -20,7 +20,8 @@ interface WorksheetCanvasProps {
   onSelectionChange?: (selection: string) => void
   isLoading?: boolean
   onImageUpload?: (base64Image: string) => void
-  onImageAnalyzed?: (markdown: string) => void
+  onImageAnalyzed?: (markdown: string, documentName?: string) => void
+  externalFileInputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 // Sample study content for demo
@@ -74,12 +75,16 @@ export function WorksheetCanvas({
   onSelectionChange,
   isLoading,
   onImageUpload,
-  onImageAnalyzed
+  onImageAnalyzed,
+  externalFileInputRef
 }: WorksheetCanvasProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(content)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const imageInputRef = useRef<HTMLInputElement>(null)
+  const internalImageInputRef = useRef<HTMLInputElement>(null)
+  
+  // Use external ref if provided, otherwise use internal ref
+  const imageInputRef = externalFileInputRef || internalImageInputRef
 
   const handleLoadSample = useCallback(() => {
     onContentChange(SAMPLE_CONTENT)
@@ -100,6 +105,7 @@ export function WorksheetCanvas({
       return
     }
 
+    const documentName = file.name
     setIsAnalyzing(true)
 
     const reader = new FileReader()
@@ -128,7 +134,7 @@ export function WorksheetCanvas({
             : data.markdown
           
           onContentChange(newContent)
-          onImageAnalyzed?.(data.markdown)
+          onImageAnalyzed?.(data.markdown, documentName)
         } catch (err) {
           console.error('Error analyzing image:', err)
           alert(err instanceof Error ? err.message : 'Failed to analyze image')
