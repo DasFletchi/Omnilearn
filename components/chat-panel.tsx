@@ -107,9 +107,9 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
       setIsProcessingImage(true)
       
       try {
-        // Send image to AI for analysis
+        // Send image to AI for analysis with Vision
         sendMessage(
-          { text: '[Uploading image...]' },
+          { text: '📷 Analyzing document...' },
           { body: { worksheetContext, uploadedImageBase64: pendingImage } }
         ).then(() => {
           onImageConsumed?.()
@@ -125,7 +125,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
         onImageConsumed?.()
       }
     }
-  }, [pendingImage, isProcessingImage, sendMessage, worksheetContent, onImageConsumed])
+  }, [pendingImage, isProcessingImage, sendMessage, worksheetContext, onImageConsumed])
 
   const isLoading = status === 'submitted' || status === 'streaming'
 

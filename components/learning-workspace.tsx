@@ -24,7 +24,6 @@ export function LearningWorkspace() {
   const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [showIntro, setShowIntro] = useState(false)
-  const [isOCRLoading, setIsOCRLoading] = useState(false)
   const [pendingImage, setPendingImage] = useState<string | null>(null)
   const hasPlayedIntro = useRef(false)
   const { showIntroLoader } = useTheme()
@@ -102,9 +101,6 @@ export function LearningWorkspace() {
               content={worksheetContent}
               onContentChange={setWorksheetContent}
               onSelectionChange={handleSelectionChange}
-              isOCRLoading={isOCRLoading}
-              onOCRStart={() => setIsOCRLoading(true)}
-              onOCRComplete={() => setIsOCRLoading(false)}
               onImageUpload={(base64) => setPendingImage(base64)}
             />
           )}
