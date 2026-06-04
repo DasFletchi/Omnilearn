@@ -143,14 +143,25 @@ export function WorksheetCanvas({
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string
-      // Remove data URL prefix for cleaner transmission
-      const base64Data = base64.split(',')[1] || base64
-      onImageUpload?.(base64Data)
+    try {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const base64 = event.target.result as string
+          // Remove data URL prefix for cleaner transmission
+          const base64Data = base64.includes(',') ? base64.split(',')[1] : base64
+          onImageUpload?.(base64Data)
+        }
+      }
+      reader.onerror = () => {
+        console.error('Failed to read image file')
+        alert('Failed to read image file')
+      }
+      reader.readAsDataURL(file)
+    } catch (err) {
+      console.error('Error reading file:', err)
+      alert('Failed to read image file')
     }
-    reader.readAsDataURL(file)
 
     // Reset input
     if (imageInputRef.current) {

@@ -32,22 +32,48 @@ export async function POST(request: NextRequest) {
     // Use mistral-ocr-latest model for document scanning
     const model = mistral.ocr('mistral-ocr-latest')
 
+    let documentInput
+    if (imageUrl) {
+      documentInput = {
+        type: 'document' as const,
+        source: {
+          type: 'url' as const,
+          url: imageUrl
+        }
+      }
+    } else {
+      documentInput = {
+        type: 'document' as const,
+        source: {
+          type: 'base64' as const,
+          data: base64Image
+        }
+      }
+    }
+
     const response = await model.invoke({
-      document: {
-        type: 'image',
-        source: imageUrl 
-          ? { type: 'url', url: imageUrl }
-          : { type: 'base64', data: base64Image }
-      },
+      document: documentInput,
       parseLanguage: true
     })
 
+    // Extract text from response - handle different possible structures
+    let extractedText = ''
+    if (typeof response.content === 'string') {
+      extractedText = response.content
+    } else if (Array.isArray(response.content)) {
+      extractedText = response.content.map(part => 
+        part.type === 'text' ? part.text : ''
+      ).join('\n\n')
+    } else if (response.content && typeof response.content === 'object' && 'text' in response.content) {
+      extractedText = (response.content as { text: string }).text
+    }
+
     return NextResponse.json({ 
-      text: response.content,
+      text: extractedText,
       model: 'mistral-ocr-latest'
     })
   } catch (error) {
-    console.error('[v0] OCR API error:', error)
+    console.error('[OCR] API error:', error)
     const message = error instanceof Error ? error.message : 'Failed to process OCR request'
     return NextResponse.json({ error: message }, { status: 500 })
   }

@@ -106,16 +106,24 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     if (pendingImage && !isProcessingImage) {
       setIsProcessingImage(true)
       
-      // Send image to AI for analysis
-      sendMessage(
-        { text: '[Uploading image...]' },
-        { body: { worksheetContext, provider: 'mistral', uploadedImageBase64: pendingImage } }
-      ).then(() => {
+      try {
+        // Send image to AI for analysis
+        sendMessage(
+          { text: '[Uploading image...]' },
+          { body: { worksheetContext, uploadedImageBase64: pendingImage } }
+        ).then(() => {
+          onImageConsumed?.()
+          setIsProcessingImage(false)
+        }).catch((err) => {
+          console.error('Image upload error:', err)
+          setIsProcessingImage(false)
+          onImageConsumed?.()
+        })
+      } catch (err) {
+        console.error('Failed to send image:', err)
+        setIsProcessingImage(false)
         onImageConsumed?.()
-        setIsProcessingImage(false)
-      }).catch(() => {
-        setIsProcessingImage(false)
-      })
+      }
     }
   }, [pendingImage, isProcessingImage, sendMessage, worksheetContent, onImageConsumed])
 
