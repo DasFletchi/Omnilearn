@@ -93,7 +93,7 @@ export function LearningWorkspace() {
             variant="outline"
             size="sm"
             onClick={() => setShowStudySheet(true)}
-            disabled={!worksheetContent && chatMessages.length === 0}
+            disabled={!worksheetContent && (!chatMessages || chatMessages.length === 0)}
             className="h-8 text-sm"
           >
             <FileText className="w-4 h-4 mr-2" />
