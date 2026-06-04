@@ -8,7 +8,8 @@ import {
   BookOpen,
   Edit3,
   Save,
-  X
+  X,
+  Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -19,6 +20,7 @@ interface WorksheetCanvasProps {
   onSelectionChange?: (selection: string) => void
   isLoading?: boolean
   onImageUpload?: (base64Image: string) => void
+  onImageAnalyzed?: (markdown: string) => void
 }
 
 // Sample study content for demo
@@ -71,10 +73,12 @@ export function WorksheetCanvas({
   onContentChange, 
   onSelectionChange,
   isLoading,
-  onImageUpload
+  onImageUpload,
+  onImageAnalyzed
 }: WorksheetCanvasProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(content)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   const handleLoadSample = useCallback(() => {
@@ -96,29 +100,54 @@ export function WorksheetCanvas({
       return
     }
 
-    try {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        if (event.target?.result) {
+    setIsAnalyzing(true)
+
+    const reader = new FileReader()
+    reader.onload = async (event) => {
+      if (event.target?.result) {
+        try {
           const base64 = event.target.result as string
           const base64Data = base64.includes(',') ? base64.split(',')[1] : base64
-          onImageUpload?.(base64Data)
+
+          const response = await fetch('/api/analyze-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64Data }),
+          })
+
+          if (!response.ok) {
+            const data = await response.json()
+            throw new Error(data.error || 'Failed to analyze image')
+          }
+
+          const data = await response.json()
+          
+          // Add the markdown content to the worksheet
+          const newContent = content 
+            ? `${content}\n\n---\n\n${data.markdown}`
+            : data.markdown
+          
+          onContentChange(newContent)
+          onImageAnalyzed?.(data.markdown)
+        } catch (err) {
+          console.error('Error analyzing image:', err)
+          alert(err instanceof Error ? err.message : 'Failed to analyze image')
+        } finally {
+          setIsAnalyzing(false)
         }
       }
-      reader.onerror = () => {
-        console.error('Failed to read image file')
-        alert('Failed to read image file')
-      }
-      reader.readAsDataURL(file)
-    } catch (err) {
-      console.error('Error reading file:', err)
-      alert('Failed to read image file')
     }
+    reader.onerror = () => {
+      console.error('Failed to read image file')
+      alert('Failed to read image file')
+      setIsAnalyzing(false)
+    }
+    reader.readAsDataURL(file)
 
     if (imageInputRef.current) {
       imageInputRef.current.value = ''
     }
-  }, [onImageUpload])
+  }, [content, onContentChange, onImageAnalyzed])
 
   const handleSaveEdit = useCallback(() => {
     onContentChange(editContent)
@@ -196,11 +225,24 @@ export function WorksheetCanvas({
               />
               <Button 
                 variant="outline"
-                className="w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial"
+                className={cn(
+                  "w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial",
+                  isAnalyzing && "opacity-50 pointer-events-none"
+                )}
                 onClick={() => imageInputRef.current?.click()}
+                disabled={isAnalyzing}
               >
-                <FileText className="w-5 h-5 mr-2" />
-                Upload Image for AI
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-5 h-5 mr-2" />
+                    Upload Image for AI
+                  </>
+                )}
               </Button>
             </div>
           </div>

@@ -24,9 +24,14 @@ export function LearningWorkspace() {
   const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [showIntro, setShowIntro] = useState(false)
-  const [pendingImage, setPendingImage] = useState<string | null>(null)
+  const [lastAnalyzedMarkdown, setLastAnalyzedMarkdown] = useState<string | null>(null)
   const hasPlayedIntro = useRef(false)
   const { showIntroLoader } = useTheme()
+
+  // Callback when image is analyzed - store the markdown for AI context
+  const handleImageAnalyzed = useCallback((markdown: string) => {
+    setLastAnalyzedMarkdown(markdown)
+  }, [])
 
   useEffect(() => {
     if (!showIntroLoader || hasPlayedIntro.current) {
@@ -101,7 +106,7 @@ export function LearningWorkspace() {
               content={worksheetContent}
               onContentChange={setWorksheetContent}
               onSelectionChange={handleSelectionChange}
-              onImageUpload={(base64) => setPendingImage(base64)}
+              onImageAnalyzed={handleImageAnalyzed}
             />
           )}
         </div>
@@ -137,8 +142,8 @@ export function LearningWorkspace() {
             onClearSelection={handleClearSelection}
             onMessagesUpdate={handleMessagesUpdate}
             onWorksheetUpdate={setWorksheetContent}
-            pendingImage={pendingImage}
-            onImageConsumed={() => setPendingImage(null)}
+            lastAnalyzedMarkdown={lastAnalyzedMarkdown}
+            onAnalyzedContextConsumed={() => setLastAnalyzedMarkdown(null)}
           />
         </div>
       </main>
