@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { 
   FileText, 
   Upload, 
@@ -8,16 +8,23 @@ import {
   BookOpen,
   Edit3,
   Save,
-  X
+  X,
+  Camera,
+  Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useOCR, OCR_SUPPORTED_TYPES, OCR_MAX_FILE_SIZE } from '@/hooks/use-ocr'
 
 interface WorksheetCanvasProps {
   content: string
   onContentChange: (content: string) => void
   onSelectionChange?: (selection: string) => void
   isLoading?: boolean
+  isOCRLoading?: boolean
+  onOCRStart?: () => void
+  onOCRComplete?: () => void
+  onImageUpload?: (base64Image: string) => void
 }
 
 // Sample study content for demo
@@ -69,15 +76,87 @@ export function WorksheetCanvas({
   content, 
   onContentChange, 
   onSelectionChange,
-  isLoading 
+  isLoading,
+  isOCRLoading,
+  onOCRStart,
+  onOCRComplete,
+  onImageUpload
 }: WorksheetCanvasProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(content)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  const { processImage, error: ocrError } = useOCR({
+    onSuccess: (text) => {
+      const newContent = content 
+        ? `${content}\n\n---\n\n## From Document\n\n${text}`
+        : text
+      onContentChange(newContent)
+      onOCRComplete?.()
+    },
+    onError: () => {
+      onOCRComplete?.()
+    }
+  })
 
   const handleLoadSample = useCallback(() => {
     onContentChange(SAMPLE_CONTENT)
     setEditContent(SAMPLE_CONTENT)
   }, [onContentChange])
+
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!OCR_SUPPORTED_TYPES.includes(file.type)) {
+      alert('Please upload an image or PDF file')
+      return
+    }
+
+    // Validate file size
+    if (file.size > OCR_MAX_FILE_SIZE) {
+      alert('File size must be less than 10MB')
+      return
+    }
+
+    onOCRStart?.()
+    await processImage(file)
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }, [processImage, onOCRStart])
+
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file')
+      return
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string
+      // Remove data URL prefix for cleaner transmission
+      const base64Data = base64.split(',')[1] || base64
+      onImageUpload?.(base64Data)
+    }
+    reader.readAsDataURL(file)
+
+    // Reset input
+    if (imageInputRef.current) {
+      imageInputRef.current.value = ''
+    }
+  }, [onImageUpload])
 
   const handleSaveEdit = useCallback(() => {
     onContentChange(editContent)
@@ -145,13 +224,45 @@ export function WorksheetCanvas({
                 <Edit3 className="w-5 h-5 mr-2" />
                 Write Your Own
               </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={OCR_SUPPORTED_TYPES.join(',')}
+                onChange={handleFileUpload}
+                className="hidden"
+                id="ocr-upload"
+              />
               <Button 
-                variant="ghost" 
-                className="w-full text-slate hover:text-foreground hover:bg-cream rounded-md h-11 text-base transition-editorial"
-                disabled
+                variant="ghost"
+                className={cn(
+                  "w-full text-slate hover:text-foreground hover:bg-cream rounded-md h-11 text-base transition-editorial",
+                  isOCRLoading && "opacity-50 pointer-events-none"
+                )}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isOCRLoading}
               >
-                <Upload className="w-5 h-5 mr-2" />
-                Upload Document (Coming Soon)
+                {isOCRLoading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Camera className="w-5 h-5 mr-2" />
+                )}
+                {isOCRLoading ? 'Scanning document...' : 'Scan Document (OCR)'}
+              </Button>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                id="image-upload"
+              />
+              <Button 
+                variant="outline"
+                className="w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                Upload Image for AI
               </Button>
             </div>
           </div>

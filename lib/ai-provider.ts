@@ -1,13 +1,12 @@
 // AI Provider Abstraction Layer
-// Supports switching between Mistral and NVIDIA NIM (and other providers)
+// Supports Mistral for GDPR-compliant processing
 
-export type AIProvider = 'mistral' | 'nvidia-nim' | 'openai'
+export type AIProvider = 'mistral'
 
 export interface AIProviderConfig {
   provider: AIProvider
   model: string
   apiKey?: string
-  baseUrl?: string
 }
 
 export interface Message {
@@ -23,20 +22,11 @@ export interface StudyContext {
   difficulty?: 'beginner' | 'intermediate' | 'advanced'
 }
 
-// Default provider configurations
+// Mistral provider configuration
 export const providerConfigs: Record<AIProvider, Omit<AIProviderConfig, 'apiKey'>> = {
   'mistral': {
     provider: 'mistral',
     model: 'mistral-large-latest',
-  },
-  'nvidia-nim': {
-    provider: 'nvidia-nim',
-    model: 'meta/llama-3.1-70b-instruct',
-    baseUrl: 'https://integrate.api.nvidia.com/v1',
-  },
-  'openai': {
-    provider: 'openai',
-    model: 'gpt-4o',
   },
 }
 

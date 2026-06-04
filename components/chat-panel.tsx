@@ -16,17 +16,22 @@ import {
   Loader2,
   RefreshCw,
   Copy,
-  Check
+  Check,
+  Mic
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { QuickAction } from '@/lib/ai-provider'
+import { useSpeechToText } from '@/hooks/use-speech-to-text'
 
 interface ChatPanelProps {
   worksheetContent: string
   selectedText?: string
   onClearSelection?: () => void
   onMessagesUpdate?: (messages: Array<{ role: string; content: string }>) => void
+  onWorksheetUpdate?: (content: string) => void
+  pendingImage?: string | null
+  onImageConsumed?: () => void
 }
 
 const quickActions: { id: QuickAction; label: string; icon: React.ElementType; description: string }[] = [
@@ -37,13 +42,14 @@ const quickActions: { id: QuickAction; label: string; icon: React.ElementType; d
   { id: 'examples', label: 'Examples', icon: FileText, description: 'Show real-world uses' },
 ]
 
-export function ChatPanel({ worksheetContent, selectedText, onClearSelection, onMessagesUpdate }: ChatPanelProps) {
+export function ChatPanel({ worksheetContent, selectedText, onClearSelection, onMessagesUpdate, onWorksheetUpdate, pendingImage, onImageConsumed }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [activeQuickAction, setActiveQuickAction] = useState<QuickAction | null>(null)
   const [copiedCodeBlock, setCopiedCodeBlock] = useState<number | null>(null)
-
   const [input, setInput] = useState('')
+  const [isProcessingImage, setIsProcessingImage] = useState(false)
+
   const {
     messages,
     sendMessage,
@@ -54,7 +60,55 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
+    onToolCall({ toolCall }) {
+      if (toolCall.toolName === 'update_worksheet') {
+        const content = toolCall.args.content as string
+        onWorksheetUpdate?.(content)
+      } else if (toolCall.toolName === 'append_to_worksheet') {
+        const section = toolCall.args.section as string
+        const content = toolCall.args.content as string
+        const newContent = worksheetContent 
+          ? `${worksheetContent}\n\n## ${section}\n\n${content}`
+          : `## ${section}\n\n${content}`
+        onWorksheetUpdate?.(newContent)
+      }
+    },
   })
+
+  const { 
+    isListening, 
+    isSupported, 
+    interimTranscript,
+    startListening, 
+    stopListening 
+  } = useSpeechToText({
+    onResult: (text) => {
+      setInput(prev => prev + (prev ? ' ' : '') + text)
+    },
+    onEnd: () => {
+      if (interimTranscript) {
+        setInput(prev => prev + (prev ? ' ' : '') + interimTranscript)
+      }
+    }
+  })
+
+  // Auto-send message when image is uploaded
+  useEffect(() => {
+    if (pendingImage && !isProcessingImage) {
+      setIsProcessingImage(true)
+      
+      // Send image to AI for analysis
+      sendMessage(
+        { text: '[Uploading image...]' },
+        { body: { worksheetContext, provider: 'mistral', uploadedImageBase64: pendingImage } }
+      ).then(() => {
+        onImageConsumed?.()
+        setIsProcessingImage(false)
+      }).catch(() => {
+        setIsProcessingImage(false)
+      })
+    }
+  }, [pendingImage, isProcessingImage, sendMessage, worksheetContent, onImageConsumed])
 
   const isLoading = status === 'submitted' || status === 'streaming'
 
@@ -269,27 +323,67 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             disabled={isLoading}
             rows={1}
             className={cn(
-              "w-full bg-background rounded-md px-4 py-3 pr-12 text-foreground text-sm",
+              "w-full bg-background rounded-md px-4 py-3 pr-20 text-foreground text-sm",
               "border border-border placeholder:text-muted-foreground",
               "resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary",
               "disabled:opacity-50 disabled:cursor-not-allowed",
-              "min-h-[44px] max-h-[120px]"
+              "min-h-[44px] max-h-[120px]",
+              !worksheetContent && "placeholder-shimmer"
             )}
             style={{ height: 'auto' }}
           />
-          <Button
-            type="submit"
-            size="sm"
-            disabled={isLoading || !(input ?? '').trim()}
-            className={cn(
-              "absolute right-2 bottom-2 h-8 w-8 p-0",
-              "bg-primary hover:bg-primary/90 text-primary-foreground",
-              "disabled:opacity-50 disabled:cursor-not-allowed"
+          <div className="absolute right-2 bottom-2 flex items-center gap-1.5">
+            {/* Microphone button */}
+            {isSupported && (
+              <div className={cn("mic-btn-container", isListening && "listening")}>
+                <div className="mic-btn-ring" />
+                <div className="mic-btn-ring" />
+                <div className="mic-btn-ring" />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={isListening ? stopListening : startListening}
+                  disabled={isLoading}
+                  className={cn(
+                    "h-8 w-8 p-0 rounded-full",
+                    isListening 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                  title={isListening ? "Stop recording" : "Start voice input"}
+                >
+                  {isListening ? (
+                    <div className="relative">
+                      <Mic className="w-4 h-4" />
+                      <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-0.5 bg-primary-foreground rounded-full" />
+                    </div>
+                  ) : (
+                    <Mic className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
             )}
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isLoading || !(input ?? '').trim()}
+              className={cn(
+                "h-8 w-8 p-0",
+                "bg-primary hover:bg-primary/90 text-primary-foreground",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </form>
+        {/* Show interim transcript while listening */}
+        {isListening && interimTranscript && (
+          <div className="mt-2 px-1 text-sm text-muted-foreground animate-pulse">
+            {interimTranscript}
+          </div>
+        )}
       </div>
     </div>
   )
