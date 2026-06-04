@@ -37,12 +37,12 @@ export function LearningWorkspace() {
     // Track uploaded document
     const newDoc = {
       id: `doc-${Date.now()}`,
-      name: documentName || `Document ${uploadedDocuments.length + 1}`,
-      thumbnail: undefined, // Could store base64 preview if needed
+      name: documentName || 'New Document',
+      thumbnail: undefined,
       uploadedAt: new Date()
     }
     setUploadedDocuments(prev => [...prev, newDoc])
-  }, [uploadedDocuments.length])
+  }, [])
 
   // Handle document upload from study sheet
   const handleStudySheetUpload = useCallback(() => {

@@ -103,13 +103,15 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
   // Send analyzed markdown context to chat when available
   useEffect(() => {
-    if (lastAnalyzedMarkdown && !isProcessingAnalyzed) {
+    if (lastAnalyzedMarkdown && !isProcessingAnalyzed && messages) {
       setIsProcessingAnalyzed(true)
       
       try {
+        const contextMsg = '📋 I just analyzed an image and added the content to the worksheet. Here\'s what I found:\n\n' + (lastAnalyzedMarkdown || '')
+        
         sendMessage(
-          { text: '📋 I just analyzed an image and added the content to the worksheet. Here\'s what I found:\n\n' + lastAnalyzedMarkdown },
-          { body: { worksheetContext: worksheetContent } }
+          { text: contextMsg },
+          { body: { worksheetContext: worksheetContent || '' } }
         ).then(() => {
           onAnalyzedContextConsumed?.()
           setIsProcessingAnalyzed(false)
@@ -124,7 +126,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
         onAnalyzedContextConsumed?.()
       }
     }
-  }, [lastAnalyzedMarkdown, isProcessingAnalyzed, sendMessage, worksheetContent, onAnalyzedContextConsumed])
+  }, [lastAnalyzedMarkdown, isProcessingAnalyzed, messages, sendMessage, worksheetContent, onAnalyzedContextConsumed])
 
   const isLoading = status === 'submitted' || status === 'streaming'
 
@@ -139,7 +141,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     if (!worksheetContent && !selectedText) return
 
     setActiveQuickAction(action)
-    const contextToUse = selectedText || worksheetContent
+    const contextToUse = selectedText || worksheetContent || ''
 
     const actionLabels: Record<QuickAction, string> = {
       explain: 'Explain this to me',
