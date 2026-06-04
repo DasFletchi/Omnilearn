@@ -738,15 +738,15 @@ h2,
   }
 }
 
-.placeholder-shimmer {
-  animation: shimmer-placeholder 2.5s ease-in-out infinite;
-  font-weight: 500;
+/* Shimmer animation for placeholder - plays once */
+.shimmer-once {
+  animation: shimmer-placeholder 2.5s ease-in-out 1;
 }
 
-/* Apply shimmer to textarea placeholder when no content */
-.chat-input-area textarea.placeholder-shimmer::placeholder {
-  animation: shimmer-placeholder 2.5s ease-in-out infinite;
-  opacity: 1;
+/* Apply single shimmer to placeholder when no content */
+.chat-input-area textarea.shimmer-once::placeholder {
+  animation: shimmer-placeholder 2.5s ease-in-out 1;
+  opacity: 0.6;
 }
 
 /* Mic button pulsing ring animation */
