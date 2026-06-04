@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     let modelMessages: ModelMessage[]
 
     if (uploadedImageBase64) {
-      // If user uploaded an image, add it as context
+      // If user uploaded an image, use Vision to analyze and convert to Markdown
       const imageMessage: ModelMessage = {
         role: 'user',
         content: [
@@ -95,17 +95,22 @@ export async function POST(request: NextRequest) {
           },
           {
             type: 'text',
-            text: 'This is my study material document. Please analyze it, extract the content, and then convert it into clean, well-formatted Markdown that I can use as study material. Structure it properly with headers, lists, and any formatting that makes sense for the content type (checklist, worksheet, notes, etc.).',
+            text: 'Please analyze this document/image and convert ALL the content into clean, well-formatted Markdown. Structure it properly with headers (# ## ###), bullet points, numbered lists, checkboxes, tables, and any formatting that best suits the content type (worksheet, checklist, notes, quiz, etc.). Preserve ALL information accurately. Include every detail from the original document.',
           },
         ],
       }
 
-      if (quickAction && worksheetContext) {
-        modelMessages = [imageMessage, { role: 'user', content: quickActionPrompts[quickAction](worksheetContext) }]
+      // Include worksheet context if available, so AI can integrate
+      if (worksheetContext) {
+        modelMessages = [
+          imageMessage,
+          {
+            role: 'user',
+            content: `Current study material:\n${worksheetContext}\n\nPlease add the analyzed content to the study material above using the update_worksheet tool.`,
+          },
+        ]
       } else {
-        // Include previous messages for context
-        const convertedMessages = await convertToModelMessages(messages)
-        modelMessages = [imageMessage, ...convertedMessages]
+        modelMessages = [imageMessage]
       }
     } else {
       modelMessages = quickAction && worksheetContext

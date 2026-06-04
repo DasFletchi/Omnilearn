@@ -49,6 +49,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
   const [copiedCodeBlock, setCopiedCodeBlock] = useState<number | null>(null)
   const [input, setInput] = useState('')
   const [isProcessingImage, setIsProcessingImage] = useState(false)
+  const [hasSeenEmptyState, setHasSeenEmptyState] = useState(false)
 
   const {
     messages,
@@ -92,21 +93,37 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     }
   })
 
+  // Trigger shimmer animation once on startup
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasSeenEmptyState(true)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
+
   // Auto-send message when image is uploaded
   useEffect(() => {
     if (pendingImage && !isProcessingImage) {
       setIsProcessingImage(true)
       
-      // Send image to AI for analysis
-      sendMessage(
-        { text: '[Uploading image...]' },
-        { body: { worksheetContext, provider: 'mistral', uploadedImageBase64: pendingImage } }
-      ).then(() => {
+      try {
+        // Send image to AI for analysis with Vision
+        sendMessage(
+          { text: '📷 Analyzing document...' },
+          { body: { worksheetContext: worksheetContent, uploadedImageBase64: pendingImage } }
+        ).then(() => {
+          onImageConsumed?.()
+          setIsProcessingImage(false)
+        }).catch((err) => {
+          console.error('Image upload error:', err)
+          setIsProcessingImage(false)
+          onImageConsumed?.()
+        })
+      } catch (err) {
+        console.error('Failed to send image:', err)
+        setIsProcessingImage(false)
         onImageConsumed?.()
-        setIsProcessingImage(false)
-      }).catch(() => {
-        setIsProcessingImage(false)
-      })
+      }
     }
   }, [pendingImage, isProcessingImage, sendMessage, worksheetContent, onImageConsumed])
 
@@ -328,7 +345,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
               "resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               "min-h-[44px] max-h-[120px]",
-              !worksheetContent && "placeholder-shimmer"
+              !worksheetContent && hasSeenEmptyState ? "shimmer-once" : ""
             )}
             style={{ height: 'auto' }}
           />
