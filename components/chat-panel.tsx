@@ -30,8 +30,8 @@ interface ChatPanelProps {
   onClearSelection?: () => void
   onMessagesUpdate?: (messages: Array<{ role: string; content: string }>) => void
   onWorksheetUpdate?: (content: string) => void
-  pendingImage?: string | null
-  onImageConsumed?: () => void
+  lastAnalyzedMarkdown?: string | null
+  onAnalyzedContextConsumed?: () => void
 }
 
 const quickActions: { id: QuickAction; label: string; icon: React.ElementType; description: string }[] = [
@@ -42,14 +42,14 @@ const quickActions: { id: QuickAction; label: string; icon: React.ElementType; d
   { id: 'examples', label: 'Examples', icon: FileText, description: 'Show real-world uses' },
 ]
 
-export function ChatPanel({ worksheetContent, selectedText, onClearSelection, onMessagesUpdate, onWorksheetUpdate, pendingImage, onImageConsumed }: ChatPanelProps) {
+export function ChatPanel({ worksheetContent, selectedText, onClearSelection, onMessagesUpdate, onWorksheetUpdate, lastAnalyzedMarkdown, onAnalyzedContextConsumed }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [activeQuickAction, setActiveQuickAction] = useState<QuickAction | null>(null)
   const [copiedCodeBlock, setCopiedCodeBlock] = useState<number | null>(null)
   const [input, setInput] = useState('')
-  const [isProcessingImage, setIsProcessingImage] = useState(false)
   const [hasSeenEmptyState, setHasSeenEmptyState] = useState(false)
+  const [isProcessingAnalyzed, setIsProcessingAnalyzed] = useState(false)
 
   const {
     messages,
@@ -101,31 +101,30 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     return () => clearTimeout(timer)
   }, [])
 
-  // Auto-send message when image is uploaded
+  // Send analyzed markdown context to chat when available
   useEffect(() => {
-    if (pendingImage && !isProcessingImage) {
-      setIsProcessingImage(true)
+    if (lastAnalyzedMarkdown && !isProcessingAnalyzed) {
+      setIsProcessingAnalyzed(true)
       
       try {
-        // Send image to AI for analysis with Vision
         sendMessage(
-          { text: '📷 Analyzing document...' },
-          { body: { worksheetContext: worksheetContent, uploadedImageBase64: pendingImage } }
+          { text: '📋 I just analyzed an image and added the content to the worksheet. Here\'s what I found:\n\n' + lastAnalyzedMarkdown },
+          { body: { worksheetContext: worksheetContent } }
         ).then(() => {
-          onImageConsumed?.()
-          setIsProcessingImage(false)
+          onAnalyzedContextConsumed?.()
+          setIsProcessingAnalyzed(false)
         }).catch((err) => {
-          console.error('Image upload error:', err)
-          setIsProcessingImage(false)
-          onImageConsumed?.()
+          console.error('Error sending analyzed context:', err)
+          setIsProcessingAnalyzed(false)
+          onAnalyzedContextConsumed?.()
         })
       } catch (err) {
-        console.error('Failed to send image:', err)
-        setIsProcessingImage(false)
-        onImageConsumed?.()
+        console.error('Failed to send analyzed context:', err)
+        setIsProcessingAnalyzed(false)
+        onAnalyzedContextConsumed?.()
       }
     }
-  }, [pendingImage, isProcessingImage, sendMessage, worksheetContent, onImageConsumed])
+  }, [lastAnalyzedMarkdown, isProcessingAnalyzed, sendMessage, worksheetContent, onAnalyzedContextConsumed])
 
   const isLoading = status === 'submitted' || status === 'streaming'
 

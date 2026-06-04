@@ -24,9 +24,30 @@ export function LearningWorkspace() {
   const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [showIntro, setShowIntro] = useState(false)
-  const [pendingImage, setPendingImage] = useState<string | null>(null)
+  const [lastAnalyzedMarkdown, setLastAnalyzedMarkdown] = useState<string | null>(null)
+  const [uploadedDocuments, setUploadedDocuments] = useState<Array<{ id: string; name: string; thumbnail?: string; uploadedAt: Date }>>([])
+  const imageUploadRef = useRef<HTMLInputElement>(null)
   const hasPlayedIntro = useRef(false)
   const { showIntroLoader } = useTheme()
+
+  // Callback when image is analyzed - store the markdown for AI context
+  const handleImageAnalyzed = useCallback((markdown: string, documentName?: string) => {
+    setLastAnalyzedMarkdown(markdown)
+    
+    // Track uploaded document
+    const newDoc = {
+      id: `doc-${Date.now()}`,
+      name: documentName || `Document ${uploadedDocuments.length + 1}`,
+      thumbnail: undefined, // Could store base64 preview if needed
+      uploadedAt: new Date()
+    }
+    setUploadedDocuments(prev => [...prev, newDoc])
+  }, [uploadedDocuments.length])
+
+  // Handle document upload from study sheet
+  const handleStudySheetUpload = useCallback(() => {
+    imageUploadRef.current?.click()
+  }, [])
 
   useEffect(() => {
     if (!showIntroLoader || hasPlayedIntro.current) {
@@ -101,7 +122,8 @@ export function LearningWorkspace() {
               content={worksheetContent}
               onContentChange={setWorksheetContent}
               onSelectionChange={handleSelectionChange}
-              onImageUpload={(base64) => setPendingImage(base64)}
+              onImageAnalyzed={handleImageAnalyzed}
+              externalFileInputRef={imageUploadRef}
             />
           )}
         </div>
@@ -137,8 +159,8 @@ export function LearningWorkspace() {
             onClearSelection={handleClearSelection}
             onMessagesUpdate={handleMessagesUpdate}
             onWorksheetUpdate={setWorksheetContent}
-            pendingImage={pendingImage}
-            onImageConsumed={() => setPendingImage(null)}
+            lastAnalyzedMarkdown={lastAnalyzedMarkdown}
+            onAnalyzedContextConsumed={() => setLastAnalyzedMarkdown(null)}
           />
         </div>
       </main>
@@ -152,12 +174,9 @@ export function LearningWorkspace() {
           worksheetContent={worksheetContent}
           chatHistory={chatMessages}
           onClose={() => setShowStudySheet(false)}
+          uploadedDocuments={uploadedDocuments}
+          onUploadDocument={handleStudySheetUpload}
         />
-      )}
-
-      {/* Settings modal */}
-      {showSettings && (
-        <SettingsModal onClose={() => setShowSettings(false)} />
       )}
     </div>
   )
