@@ -132,8 +132,10 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
   // Auto-scroll to bottom and notify parent of messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    onMessagesUpdate?.(messages.map(m => ({ role: m.role, content: getMessageText(m) })))
+    if (messages && Array.isArray(messages)) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      onMessagesUpdate?.(messages.map(m => ({ role: m.role, content: getMessageText(m) })))
+    }
   }, [messages, onMessagesUpdate])
 
   // Handle quick action click
@@ -199,7 +201,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
     }
   }, [input])
 
-  const showEmptyState = messages.length === 0
+  const showEmptyState = !messages || !Array.isArray(messages) || messages.length === 0
 
   return (
     <div className="chat-panel h-full flex flex-col">
@@ -210,7 +212,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
         </div>
-        {messages.length > 0 && (
+        {messages && Array.isArray(messages) && messages.length > 0 && (
           <Button
             variant="ghost"
             size="sm"
@@ -255,7 +257,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
               />
             ))}
 
-            {isLoading && messages[messages.length - 1]?.role === 'user' && (
+            {isLoading && messages && Array.isArray(messages) && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary" />

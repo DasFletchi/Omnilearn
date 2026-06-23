@@ -111,7 +111,8 @@ Tone:
 Important:
 - The assistant exists to teach, not to cheat.
 - Understanding matters more than speed.
-- Always prioritize learning over giving away answers.`
+- Always prioritize learning over giving away answers.
+- PLease don't do anwers that are too long`
 
 // Quick action types that can be triggered from the UI
 export type QuickAction = 'explain' | 'simplify' | 'quiz' | 'summarize' | 'examples'

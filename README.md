@@ -38,8 +38,6 @@
 - Node.js 16+
 - API keys for at least one AI provider:
   - [Mistral API](https://console.mistral.ai/)
-  - [OpenAI API](https://platform.openai.com/api-keys)
-  - [NVIDIA NIM API](https://build.nvidia.com/)
 
 ### Installation
 
