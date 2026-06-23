@@ -103,7 +103,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
   // Send analyzed markdown context to chat when available
   useEffect(() => {
-    if (lastAnalyzedMarkdown && !isProcessingAnalyzed && Array.isArray(messages) && messages.length > 0) {
+    if (lastAnalyzedMarkdown && !isProcessingAnalyzed && messages) {
       setIsProcessingAnalyzed(true)
       
       try {
