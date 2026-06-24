@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      markdown: markdownContent,
+      markdown: markdownContent || '# No content detected\n\nThe image may not contain readable text or the analysis failed.',
       success: true,
     })
   } catch (error) {

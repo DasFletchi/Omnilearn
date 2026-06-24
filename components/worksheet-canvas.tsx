@@ -360,7 +360,7 @@ You can use Markdown formatting:
             )}
             onMouseUp={handleTextSelection}
           >
-            <div className="prose prose-lg max-w-none">
+            <div className="max-w-none space-y-6">
               <MarkdownRenderer content={content} />
             </div>
           </div>
