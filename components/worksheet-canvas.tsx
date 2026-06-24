@@ -172,134 +172,147 @@ export function WorksheetCanvas({
     }
   }, [onSelectionChange])
 
-  // Empty state
-  if (!content) {
-    return (
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-background">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
-              <FileText className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-serif font-semibold text-foreground text-lg">Study Material</h2>
-              <p className="text-sm text-slate">Your learning workspace</p>
+  return (
+    <div className="h-full flex flex-col">
+      {/* Persistent hidden file input for image upload */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="hidden"
+        id="image-upload"
+      />
+
+      {!content ? (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-background">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-serif font-semibold text-foreground text-lg">Study Material</h2>
+                <p className="text-sm text-slate">Your learning workspace</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Empty state content */}
-        <div className="flex-1 flex items-center justify-center p-10">
-          <div className="text-center max-w-md">
-            <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mx-auto mb-8">
-              <BookOpen className="w-10 h-10 text-slate" />
+          {/* Empty state content */}
+          <div className="flex-1 flex items-center justify-center p-10">
+            <div className="text-center max-w-md">
+              <div className="w-20 h-20 rounded-xl bg-cream border border-beige-deep flex items-center justify-center mx-auto mb-8">
+                <BookOpen className="w-10 h-10 text-slate" />
+              </div>
+              <h3 className="text-2xl font-serif font-semibold text-foreground mb-3 text-balance">
+                No study material yet
+              </h3>
+              <p className="text-slate text-base mb-8 leading-relaxed">
+                Add your study content to get started. You can paste notes, upload documents, 
+                or load a sample to see how OmniLearnAI works.
+              </p>
+
+              {/* Onboarding hints */}
+              <div className="mb-6 space-y-2 text-left">
+                <div className="flex items-center gap-2.5 text-sm text-slate">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                  <span>Upload an image of your study material &rarr; AI extracts and formats it</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-slate">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                  <span>Chat with the AI to explain, summarize, or quiz you</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-slate">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+                  <span>Export a study sheet with all your material and insights</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <Button 
+                  onClick={handleLoadSample}
+                  className="w-full bg-primary hover:bg-primary-deep text-primary-foreground rounded-md h-11 text-base font-medium transition-editorial"
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Load Sample Content
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial"
+                  onClick={() => {
+                    setIsEditing(true)
+                    setEditContent('')
+                  }}
+                >
+                  <Edit3 className="w-5 h-5 mr-2" />
+                  Write Your Own
+                </Button>
+                <Button 
+                  variant="outline"
+                  className={cn(
+                    "w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial",
+                    isAnalyzing && "opacity-50 pointer-events-none"
+                  )}
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-5 h-5 mr-2" />
+                      Upload Image for AI
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-            <h3 className="text-2xl font-serif font-semibold text-foreground mb-3 text-balance">
-              No study material yet
-            </h3>
-            <p className="text-slate text-base mb-8 leading-relaxed">
-              Add your study content to get started. You can paste notes, upload documents, 
-              or load a sample to see how Lumina works.
-            </p>
-            <div className="flex flex-col gap-3">
-              <Button 
-                onClick={handleLoadSample}
-                className="w-full bg-primary hover:bg-primary-deep text-primary-foreground rounded-md h-11 text-base font-medium transition-editorial"
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Load Sample Content
-              </Button>
+          </div>
+        </>
+      ) : null}
+
+      {/* Editing mode */}
+      {content && isEditing ? (
+        <>
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-background">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+                <Edit3 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-serif font-semibold text-foreground text-lg">Editing</h2>
+                <p className="text-sm text-slate">Markdown supported</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
               <Button 
                 variant="outline" 
-                className="w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial"
-                onClick={() => {
-                  setIsEditing(true)
-                  setEditContent('')
-                }}
+                size="sm"
+                onClick={handleCancelEdit}
+                className="rounded-md border-border hover:bg-cream hover:border-beige-deep text-slate hover:text-foreground transition-editorial"
               >
-                <Edit3 className="w-5 h-5 mr-2" />
-                Write Your Own
+                <X className="w-4 h-4 mr-1.5" />
+                Cancel
               </Button>
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                id="image-upload"
-              />
               <Button 
-                variant="outline"
-                className={cn(
-                  "w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial",
-                  isAnalyzing && "opacity-50 pointer-events-none"
-                )}
-                onClick={() => imageInputRef.current?.click()}
-                disabled={isAnalyzing}
+                size="sm"
+                onClick={handleSaveEdit}
+                className="bg-primary hover:bg-primary-deep text-primary-foreground rounded-md transition-editorial"
               >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="w-5 h-5 mr-2" />
-                    Upload Image for AI
-                  </>
-                )}
+                <Save className="w-4 h-4 mr-1.5" />
+                Save
               </Button>
             </div>
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Editing mode
-  if (isEditing) {
-    return (
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-background">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
-              <Edit3 className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="font-serif font-semibold text-foreground text-lg">Editing</h2>
-              <p className="text-sm text-slate">Markdown supported</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleCancelEdit}
-              className="rounded-md border-border hover:bg-cream hover:border-beige-deep text-slate hover:text-foreground transition-editorial"
-            >
-              <X className="w-4 h-4 mr-1.5" />
-              Cancel
-            </Button>
-            <Button 
-              size="sm"
-              onClick={handleSaveEdit}
-              className="bg-primary hover:bg-primary-deep text-primary-foreground rounded-md transition-editorial"
-            >
-              <Save className="w-4 h-4 mr-1.5" />
-              Save
-            </Button>
-          </div>
-        </div>
-
-        {/* Editor */}
-        <div className="flex-1 p-8">
-          <textarea
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            className="w-full h-full bg-cream border border-beige-deep rounded-lg p-5 text-foreground placeholder:text-stone resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm leading-relaxed transition-editorial"
-            placeholder="Paste or type your study material here...
+          <div className="flex-1 p-8">
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full h-full bg-cream border border-beige-deep rounded-lg p-5 text-foreground placeholder:text-stone resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm leading-relaxed transition-editorial"
+              placeholder="Paste or type your study material here...
 
 You can use Markdown formatting:
 # Heading 1
@@ -307,53 +320,51 @@ You can use Markdown formatting:
 **bold text**
 - bullet points
 1. numbered lists"
-            autoFocus
-          />
-        </div>
-      </div>
-    )
-  }
-
-  // Content view
-  return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-background">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
-            <FileText className="w-5 h-5 text-primary" />
+              autoFocus
+            />
           </div>
-          <div>
-            <h2 className="font-serif font-semibold text-foreground text-lg">Study Material</h2>
-            <p className="text-sm text-slate">Select text to ask about it</p>
-          </div>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => {
-            setEditContent(content)
-            setIsEditing(true)
-          }}
-          className="rounded-md border-border hover:bg-cream hover:border-beige-deep text-slate hover:text-foreground transition-editorial"
-        >
-          <Edit3 className="w-4 h-4 mr-1.5" />
-          Edit
-        </Button>
-      </div>
+        </>
+      ) : null}
 
-      {/* Content */}
-      <div 
-        className={cn(
-          "flex-1 overflow-y-auto p-8",
-          isLoading && "opacity-50 pointer-events-none"
-        )}
-        onMouseUp={handleTextSelection}
-      >
-        <div className="prose prose-lg max-w-none">
-          <MarkdownRenderer content={content} />
-        </div>
-      </div>
+      {/* Content view */}
+      {content && !isEditing ? (
+        <>
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-background">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-serif font-semibold text-foreground text-lg">Study Material</h2>
+                <p className="text-sm text-slate">Select text to ask about it</p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                setEditContent(content)
+                setIsEditing(true)
+              }}
+              className="rounded-md border-border hover:bg-cream hover:border-beige-deep text-slate hover:text-foreground transition-editorial"
+            >
+              <Edit3 className="w-4 h-4 mr-1.5" />
+              Edit
+            </Button>
+          </div>
+          <div 
+            className={cn(
+              "flex-1 overflow-y-auto p-8",
+              isLoading && "opacity-50 pointer-events-none"
+            )}
+            onMouseUp={handleTextSelection}
+          >
+            <div className="prose prose-lg max-w-none">
+              <MarkdownRenderer content={content} />
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

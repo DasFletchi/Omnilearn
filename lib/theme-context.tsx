@@ -18,7 +18,7 @@ const themes: ThemeVariant[] = ['perplexity', 'mistral', 'dark', 'chatgpt']
 function getStoredTheme(): ThemeVariant {
   if (typeof window === 'undefined') return 'mistral'
 
-  const stored = window.localStorage.getItem('lumina-theme') as ThemeVariant | null
+  const stored = window.localStorage.getItem('omnilearn-theme') as ThemeVariant | null
 
   return stored && themes.includes(stored) ? stored : 'mistral'
 }
@@ -50,7 +50,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mounted) return
 
-    localStorage.setItem('lumina-theme', theme)
+    localStorage.setItem('omnilearn-theme', theme)
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme, mounted])
 

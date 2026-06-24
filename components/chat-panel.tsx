@@ -103,23 +103,30 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
   // Send analyzed markdown context to chat when available
   useEffect(() => {
-    if (lastAnalyzedMarkdown && !isProcessingAnalyzed && messages) {
+    if (lastAnalyzedMarkdown && !isProcessingAnalyzed && Array.isArray(messages)) {
       setIsProcessingAnalyzed(true)
       
       try {
         const contextMsg = '📋 I just analyzed an image and added the content to the worksheet. Here\'s what I found:\n\n' + (lastAnalyzedMarkdown || '')
         
-        sendMessage(
+        const sendPromise = sendMessage(
           { text: contextMsg },
           { body: { worksheetContext: worksheetContent || '' } }
-        ).then(() => {
-          onAnalyzedContextConsumed?.()
+        ) as Promise<void> | undefined
+        
+        if (sendPromise && typeof sendPromise.then === 'function') {
+          sendPromise.then(() => {
+            onAnalyzedContextConsumed?.()
+            setIsProcessingAnalyzed(false)
+          }).catch((err) => {
+            console.error('Error sending analyzed context:', err)
+            setIsProcessingAnalyzed(false)
+            onAnalyzedContextConsumed?.()
+          })
+        } else {
           setIsProcessingAnalyzed(false)
-        }).catch((err) => {
-          console.error('Error sending analyzed context:', err)
-          setIsProcessingAnalyzed(false)
           onAnalyzedContextConsumed?.()
-        })
+        }
       } catch (err) {
         console.error('Failed to send analyzed context:', err)
         setIsProcessingAnalyzed(false)
@@ -130,13 +137,19 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
   const isLoading = status === 'submitted' || status === 'streaming'
 
+  // Safe message accessor - handles undefined parts
+  const getMessages = useCallback(() => {
+    return Array.isArray(messages) ? messages : []
+  }, [messages])
+
   // Auto-scroll to bottom and notify parent of messages
   useEffect(() => {
-    if (messages && Array.isArray(messages)) {
+    const safeMessages = getMessages()
+    if (safeMessages.length > 0) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      onMessagesUpdate?.(messages.map(m => ({ role: m.role, content: getMessageText(m) })))
+      onMessagesUpdate?.(safeMessages.map(m => ({ role: m.role, content: getMessageText(m) })))
     }
-  }, [messages, onMessagesUpdate])
+  }, [messages, onMessagesUpdate, getMessages])
 
   // Handle quick action click
   const handleQuickAction = useCallback(async (action: QuickAction) => {
@@ -206,7 +219,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
   return (
     <div className="chat-panel h-full flex flex-col">
       {/* Header */}
-      <div className="chat-panel-header flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border bg-card">
+      <div className="chat-panel-header flex items-center justify-between px-6 py-3 border-b border-border bg-card">
         <div className="flex items-center gap-3" aria-label="AI chat">
           <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-5 h-5 text-primary-foreground" />
@@ -352,10 +365,10 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             )}
             style={{ height: 'auto' }}
           />
-          <div className="absolute right-2 bottom-2 flex items-center gap-1.5">
+          <div className="absolute right-2 inset-y-0 flex items-center gap-1.5 pointer-events-none">
             {/* Microphone button */}
             {isSupported && (
-              <div className={cn("mic-btn-container", isListening && "listening")}>
+              <div className={cn("mic-btn-container pointer-events-auto", isListening && "listening")}>
                 <div className="mic-btn-ring" />
                 <div className="mic-btn-ring" />
                 <div className="mic-btn-ring" />
@@ -389,7 +402,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
               size="sm"
               disabled={isLoading || !(input ?? '').trim()}
               className={cn(
-                "h-8 w-8 p-0",
+                "h-8 w-8 p-0 pointer-events-auto",
                 "bg-primary hover:bg-primary/90 text-primary-foreground",
                 "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
@@ -411,6 +424,9 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
 
 // Message bubble component
 function getMessageText(message: UIMessage): string {
+  if (!message || !Array.isArray(message.parts)) {
+    return typeof message?.content === 'string' ? message.content : ''
+  }
   return message.parts
     .map((part) => (part.type === 'text' ? part.text : ''))
     .filter(Boolean)

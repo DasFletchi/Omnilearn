@@ -2,8 +2,6 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import {
-  FileText,
-  Settings,
   PanelLeftClose,
   PanelLeft,
   Sparkles
@@ -12,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { WorksheetCanvas } from '@/components/worksheet-canvas'
 import { ChatPanel } from '@/components/chat-panel'
 import { StudySheet } from '@/components/study-sheet'
-import { SettingsModal } from '@/components/settings-modal'
 import { useTheme } from '@/lib/theme-context'
 import { cn } from '@/lib/utils'
 
@@ -20,7 +17,6 @@ export function LearningWorkspace() {
   const [worksheetContent, setWorksheetContent] = useState('')
   const [selectedText, setSelectedText] = useState('')
   const [showStudySheet, setShowStudySheet] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
   const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [showIntro, setShowIntro] = useState(false)
@@ -86,28 +82,8 @@ export function LearningWorkspace() {
       {/* Sunset stripe - only shows in Mistral theme */}
       <div className="sunset-stripe relative z-10 w-full flex-shrink-0" />
 
-      {/* Top header bar */}
-      <header className="workspace-header relative z-10 flex items-center justify-end px-6 py-3 border-b border-border bg-card">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowStudySheet(true)}
-            disabled={!worksheetContent && (!chatMessages || chatMessages.length === 0)}
-            className="h-8 text-sm"
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            Study Sheet
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowSettings(true)}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          >
-            <Settings className="w-4 h-4" />
-          </Button>
-        </div>
+      {/* Top header bar - empty, no buttons */}
+      <header className="workspace-header relative z-10 flex items-center justify-end px-4 py-2 border-b border-border bg-card">
       </header>
 
       {/* Main content area - split screen */}
