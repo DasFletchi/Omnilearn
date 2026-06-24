@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createMistral } from '@ai-sdk/mistral'
 
 export const maxDuration = 60
 
@@ -26,33 +25,76 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const mistral = createMistral({ apiKey })
-    const model = mistral('mistral-large-latest')
+    // Use Mistral REST API directly for vision analysis
+    // Build data URL from base64
+    const dataUrl = `data:image/png;base64,${imageBase64}`
 
-    // Use vision to analyze the image and convert to Markdown
-    const result = await model.doStream({
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              image: imageBase64,
-            },
-            {
-              type: 'text',
-              text: 'Please analyze this document/image and convert ALL the content into clean, well-formatted Markdown. Structure it properly with headers (# ## ###), bullet points, numbered lists, checkboxes, tables, and any formatting that best suits the content type (worksheet, checklist, notes, quiz, etc.). Preserve ALL information accurately. Include every detail from the original document. Return ONLY the Markdown content, nothing else.',
-            },
-          ],
-        },
-      ],
+    const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'mistral-large-latest',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: dataUrl,
+              },
+              {
+                type: 'text',
+                text: 'Please analyze this document/image and convert ALL the content into clean, well-formatted Markdown. Structure it properly with headers (# ## ###), bullet points, numbered lists, checkboxes, tables, and any formatting that best suits the content type (worksheet, checklist, notes, quiz, etc.). Preserve ALL information accurately. Include every detail from the original document. Return ONLY the Markdown content, nothing else.',
+              },
+            ],
+          },
+        ],
+        stream: true,
+        max_tokens: 4096,
+      }),
     })
 
-    // Collect the response
+    if (!response.ok) {
+      const errData = await response.text()
+      throw new Error(`Mistral API error: ${response.status} ${errData}`)
+    }
+
+    // Parse the SSE stream
     let markdownContent = ''
-    for await (const chunk of result.fullStream) {
-      if (chunk.type === 'text-delta') {
-        markdownContent += chunk.textDelta
+    const reader = response.body?.getReader()
+    if (!reader) {
+      throw new Error('No response body from Mistral API')
+    }
+
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6)
+          if (data === '[DONE]') continue
+          
+          try {
+            const parsed = JSON.parse(data)
+            const delta = parsed.choices?.[0]?.delta?.content
+            if (delta) {
+              markdownContent += delta
+            }
+          } catch {
+            // Skip malformed JSON lines
+          }
+        }
       }
     }
 

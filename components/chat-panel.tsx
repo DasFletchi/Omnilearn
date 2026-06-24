@@ -365,7 +365,7 @@ export function ChatPanel({ worksheetContent, selectedText, onClearSelection, on
             )}
             style={{ height: 'auto' }}
           />
-          <div className="absolute right-2 inset-y-0 flex items-center gap-1.5 pointer-events-none">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
             {/* Microphone button */}
             {isSupported && (
               <div className={cn("mic-btn-container pointer-events-auto", isListening && "listening")}>

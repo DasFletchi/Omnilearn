@@ -189,7 +189,7 @@ export function WorksheetCanvas({
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-background">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
                 <FileText className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -279,7 +279,7 @@ export function WorksheetCanvas({
         <>
           <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-background">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
                 <Edit3 className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -331,7 +331,7 @@ You can use Markdown formatting:
         <>
           <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-background">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-cream border border-beige-deep flex items-center justify-center">
                 <FileText className="w-5 h-5 text-primary" />
               </div>
               <div>
