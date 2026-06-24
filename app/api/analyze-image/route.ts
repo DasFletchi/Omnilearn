@@ -4,11 +4,12 @@ export const maxDuration = 60
 
 type AnalyzeRequestBody = {
   imageBase64: string
+  mediaType: string
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { imageBase64 } = (await request.json()) as AnalyzeRequestBody
+    const { imageBase64, mediaType } = (await request.json()) as AnalyzeRequestBody
 
     if (!imageBase64) {
       return NextResponse.json(
@@ -26,8 +27,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Use Mistral REST API directly for vision analysis
-    // Build data URL from base64
-    const dataUrl = `data:image/png;base64,${imageBase64}`
+    // Build data URL from base64 with the correct media type
+    const mime = mediaType || 'image/png'
+    const dataUrl = `data:${mime};base64,${imageBase64}`
 
     const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',

@@ -114,11 +114,12 @@ export function WorksheetCanvas({
         try {
           const base64 = event.target.result as string
           const base64Data = base64.includes(',') ? base64.split(',')[1] : base64
+          const mediaType = file.type || 'image/png'
 
           const response = await fetch('/api/analyze-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageBase64: base64Data }),
+            body: JSON.stringify({ imageBase64: base64Data, mediaType }),
           })
 
           if (!response.ok) {
