@@ -231,23 +231,12 @@ export function WorksheetCanvas({
               </div>
               <div className="flex flex-col gap-3">
                 <Button 
-                  onClick={handleLoadSample}
-                  className="w-full bg-primary hover:bg-primary-deep text-primary-foreground rounded-md h-11 text-base font-medium transition-editorial"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Load Sample Content
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full rounded-md h-11 text-base border-border hover:bg-cream hover:border-beige-deep transition-editorial"
-                  onClick={() => {
-                    setIsEditing(true)
-                    setEditContent('')
-                  }}
-                >
-                  <Edit3 className="w-5 h-5 mr-2" />
-                  Write Your Own
-                </Button>
+                                  onClick={handleLoadSample}
+                                  className="w-full bg-primary hover:bg-primary-deep text-primary-foreground rounded-md h-11 text-base font-medium transition-editorial"
+                                >
+                                  <Sparkles className="w-5 h-5 mr-2" />
+                                  Load Sample Content
+                                </Button>
                 <Button 
                   variant="outline"
                   className={cn(
