@@ -342,105 +342,117 @@ ${extractedInsights || 'No conversations yet. Chat with Lumina to generate insig
 }
 
 // Markdown renderer for study sheet
+// Markdown renderer for study sheet
 function StudySheetMarkdown({ content }: { content: string }) {
-  const lines = content.split('\n')
-  const elements: React.ReactNode[] = []
+  try {
+    // If content is empty, return a placeholder
+    if (!content || content.trim() === '') {
+      return <div className="text-sm text-muted-italic">No content</div>;
+    }
+    const lines = content.split('\\n');
+    const elements: React.ReactNode[] = [];
+    const processInlineFormatting = (text: string): React.ReactNode => {
+      const parts: React.ReactNode[] = [];
+      let remaining = text;
+      let key = 0;
 
-  const processInlineFormatting = (text: string): React.ReactNode => {
-    const parts: React.ReactNode[] = []
-    let remaining = text
-    let key = 0
+      while (remaining.length > 0) {
+        const boldMatch = remaining.match(/\\*\\*(.+?)\\*\\*/);
+        const codeMatch = remaining.match(/`([^`]+)`/);
 
-    while (remaining.length > 0) {
-      const boldMatch = remaining.match(/\*\*(.+?)\*\*/)
-      const codeMatch = remaining.match(/`([^`]+)`/)
-      
-      const matches = [
-        boldMatch ? { match: boldMatch, type: 'bold' } : null,
-        codeMatch ? { match: codeMatch, type: 'code' } : null,
-      ].filter(Boolean).sort((a, b) => 
-        (a?.match?.index ?? Infinity) - (b?.match?.index ?? Infinity)
-      )
+        const matches = [
+          boldMatch ? { match: boldMatch, type: 'bold', index: boldMatch.index ?? 0 } : null,
+          codeMatch ? { match: codeMatch, type: 'code', index: codeMatch.index ?? 0 } : null,
+        ].filter(Boolean).sort((a, b) =>
+          (a?.index ?? Infinity) - (b?.index ?? Infinity)
+        );
 
-      if (matches.length > 0 && matches[0]) {
-        const { match, type } = matches[0]
-        const index = match?.index ?? 0
-        
-        if (index > 0) {
-          parts.push(<span key={key++}>{remaining.slice(0, index)}</span>)
+        if (matches.length > 0 && matches[0]) {
+          const { match, type, index } = matches[0];
+
+          if (index > 0) {
+            parts.push(<span key={key++}>{remaining.slice(0, index)}</span>);
+          }
+
+          if (type === 'bold' && match) {
+            parts.push(<strong key={key++} className="font-semibold text-foreground">{match[1]}</strong>);
+          } else if (type === 'code' && match) {
+            parts.push(
+              <code key={key++} className="px-1.5 py-0.5 rounded-md bg-surface-code text-on-dark font-mono text-sm">
+                {match[1]}
+              </code>
+            );
+          }
+
+          remaining = remaining.slice(index + (match?.[0]?.length ?? 0));
+        } else {
+          parts.push(<span key={key++}>{remaining}</span>);
+          break;
         }
-        
-        if (type === 'bold' && match) {
-          parts.push(<strong key={key++} className="font-semibold text-foreground">{match[1]}</strong>)
-        } else if (type === 'code' && match) {
-          parts.push(
-            <code key={key++} className="px-1.5 py-0.5 rounded-md bg-surface-code text-on-dark font-mono text-sm">
-              {match[1]}
-            </code>
-          )
-        }
-        
-        remaining = remaining.slice(index + (match?.[0]?.length ?? 0))
+      }
+
+      return parts.length > 0 ? parts : text;
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.startsWith('# ')) {
+        elements.push(
+          <h2 key={i} className="text-2xl font-serif font-bold text-foreground mt-5 mb-4 first:mt-0" style={{ letterSpacing: '-0.5px' }}>
+            {processInlineFormatting(line.slice(2))}
+          </h2>
+        );
+      } else if (line.startsWith('## ')) {
+        elements.push(
+          <h3 key={i} className="text-xl font-serif font-semibold text-foreground mt-5 mb-3" style={{ letterSpacing: '-0.5px' }}>
+            {processInlineFormatting(line.slice(3))}
+          </h3>
+        );
+      } else if (line.startsWith('### ')) {
+        elements.push(
+          <h4 key={i} className="text-lg font-semibold text-foreground mt-4 mb-2" style={{ lineHeight: '1.25' }}>
+            {processInlineFormatting(line.slice(4))}
+          </h4>
+        );
+      } else if (line.startsWith('> ')) {
+        elements.push(
+          <blockquote key={i} className="border-l-3 border-primary pl-5 my-4 text-charcoal italic" style={{ lineHeight: '1.55' }}>
+            {processInlineFormatting(line.slice(2))}
+          </blockquote>
+        );
+      } else if (line.match(/^[-*] /)) {
+        elements.push(
+          <li key={i} className="text-charcoal ml-6 my-1.5 list-disc text-base" style={{ lineHeight: '1.55' }}>
+            {processInlineFormatting(line.slice(2))}
+          </li>
+        );
+      } else if (line.match(/^\\d+\\. /)) {
+        elements.push(
+          <li key={i} className="text-charcoal ml-6 my-1.5 list-decimal text-base" style={{ lineHeight: '1.55' }}>
+            {processInlineFormatting(line.replace(/^\\d+\\. /, ''))}
+          </li>
+        );
+      } else if (line.trim() === '') {
+        elements.push(<div key={i} className="h-3" />);
+      } else if (line.trim() === '---') {
+        elements.push(<hr key={i} className="my-5 border-border" />);
       } else {
-        parts.push(<span key={key++}>{remaining}</span>)
-        break
+        elements.push(
+          <p key={i} className="text-charcoal text-base my-2" style={{ lineHeight: '1.55' }}>
+            {processInlineFormatting(line)}
+          </p>
+        );
       }
     }
 
-    return parts.length > 0 ? parts : text
+    return <div className="space-y-1">{elements}</div>;
+  } catch (err) {
+    console.error('StudySheetMarkdown error:', err);
+    return (
+      <div className="p-4 bg-muted/10 rounded">
+        <pre className="whitespace-pre-wrap">{content}</pre>
+      </div>
+    );
   }
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-
-    if (line.startsWith('# ')) {
-      elements.push(
-        <h2 key={i} className="text-2xl font-serif font-bold text-foreground mt-5 mb-4 first:mt-0" style={{ letterSpacing: '-0.5px' }}>
-          {processInlineFormatting(line.slice(2))}
-        </h2>
-      )
-    } else if (line.startsWith('## ')) {
-      elements.push(
-        <h3 key={i} className="text-xl font-serif font-semibold text-foreground mt-5 mb-3" style={{ letterSpacing: '-0.5px' }}>
-          {processInlineFormatting(line.slice(3))}
-        </h3>
-      )
-    } else if (line.startsWith('### ')) {
-      elements.push(
-        <h4 key={i} className="text-lg font-semibold text-foreground mt-4 mb-2">
-          {processInlineFormatting(line.slice(4))}
-        </h4>
-      )
-    } else if (line.startsWith('> ')) {
-      elements.push(
-        <blockquote key={i} className="border-l-3 border-primary pl-5 my-4 text-charcoal italic" style={{ lineHeight: '1.55' }}>
-          {processInlineFormatting(line.slice(2))}
-        </blockquote>
-      )
-    } else if (line.match(/^[-*] /)) {
-      elements.push(
-        <li key={i} className="text-charcoal ml-6 my-1.5 list-disc text-base" style={{ lineHeight: '1.55' }}>
-          {processInlineFormatting(line.slice(2))}
-        </li>
-      )
-    } else if (line.match(/^\d+\. /)) {
-      elements.push(
-        <li key={i} className="text-charcoal ml-6 my-1.5 list-decimal text-base" style={{ lineHeight: '1.55' }}>
-          {processInlineFormatting(line.replace(/^\d+\. /, ''))}
-        </li>
-      )
-    } else if (line.trim() === '') {
-      elements.push(<div key={i} className="h-3" />)
-    } else if (line.trim() === '---') {
-      elements.push(<hr key={i} className="my-5 border-border" />)
-    } else {
-      elements.push(
-        <p key={i} className="text-charcoal text-base my-2" style={{ lineHeight: '1.55' }}>
-          {processInlineFormatting(line)}
-        </p>
-      )
-    }
-  }
-
-  return <div className="space-y-1">{elements}</div>
 }
