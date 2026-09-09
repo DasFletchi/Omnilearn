@@ -1,5 +1,7 @@
 # 🧠 Omnilearn - AI-Powered Learning Assistant
 
+# WORKED ON FOR A PROJECT I DID FOR CLASS, I DON'T NORMALLY VIBECODE MY PROJECTS, AND THIS IS NOT HOW MY PROJECTS USUALLY ARE
+
 > Your personal AI tutor that adapts to your learning style. Study smarter, not harder.
 
 ![Mistral Theme](https://img.shields.io/badge/theme-mistral-FF6A2A?style=flat-square)
